@@ -5,10 +5,18 @@ using System.Windows.Forms;
 
 namespace Project_56.Forms
 {
-    public partial class Task2 : Form
+    public partial class Task4 : Form
     {
+        ManualResetEvent manualReset = new ManualResetEvent(true);
+        ManualResetEvent manualResetFibonacci = new ManualResetEvent(true);
+        private Thread thread;
+        private Thread thread_fibonacci;
         private Button button = new Button();
         private Button button_fibonacci = new Button();
+        private Button button_stop = new Button();
+        private Button button_fibonacci_stop = new Button();
+        private CheckBox pause = new CheckBox();
+        private CheckBox fibonacci_pause = new CheckBox();
         private TextBox text_start = new TextBox();
         private TextBox text_end = new TextBox();
         private Label label_start = new Label();
@@ -18,7 +26,7 @@ namespace Project_56.Forms
         private Label number_output = new Label();
         private Label number_output_fibonaci = new Label();
         private bool check_close_form = false;
-        public Task2()
+        public Task4()
         {
             InitializeComponent();
 
@@ -30,6 +38,25 @@ namespace Project_56.Forms
             button_fibonacci.AutoSize = true;
             button_fibonacci.Location = new Point(100, 10);
             button_fibonacci.Click += StartFibonacci_Click;
+
+            button_stop.Text = "Stop";
+            button_stop.Location = new Point(10, 35);
+            button_stop.Click += Stop_Click;
+
+            button_fibonacci_stop.Text = "Stop Fibonacci";
+            button_fibonacci_stop.AutoSize = true;
+            button_fibonacci_stop.Location = new Point(100, 35);
+            button_fibonacci_stop.Click += StopFibonacci_Click;
+
+            pause.Text = "Pause";
+            pause.AutoSize = true;
+            pause.Location = new Point(200, 170);
+            pause.CheckedChanged += Pause_Click;
+
+            fibonacci_pause.Text = "Pause";
+            fibonacci_pause.AutoSize = true;
+            fibonacci_pause.Location = new Point(200, 215);
+            fibonacci_pause.CheckedChanged += PauseFibonacci_Click;
 
 
             text_start.Location = new Point(70, 60);
@@ -65,15 +92,52 @@ namespace Project_56.Forms
             Controls.Add(button_fibonacci);
             Controls.Add(number_fibonacci);
             Controls.Add(number_output_fibonaci);
+            Controls.Add(button_stop);
+            Controls.Add(button_fibonacci_stop);
+            Controls.Add(pause);
+            Controls.Add(fibonacci_pause);
             FormClosed += Task1_FormClosed;
         }
 
 
         private void Task1_FormClosed(object sender, FormClosedEventArgs e)
         {
+            if (fibonacci_pause.Checked) manualResetFibonacci.Set();
+            if (pause.Checked) manualReset.Set();
             check_close_form = true;
         }
 
+        private void PauseFibonacci_Click(object sender, EventArgs e)
+        {
+            if (thread_fibonacci != null)
+            {
+                if (thread_fibonacci.ThreadState != ThreadState.Unstarted)
+                {
+                    if (fibonacci_pause.Checked) manualResetFibonacci.Reset();
+                    else manualResetFibonacci.Set();
+                }
+            }
+        }
+        private void Pause_Click(object sender, EventArgs e)
+        {
+            if (thread != null)
+            {
+                if(thread.ThreadState != ThreadState.Unstarted)
+                {
+                    if (pause.Checked) manualReset.Reset();
+                    else manualReset.Set();
+                }
+            }
+
+        }
+        private void StopFibonacci_Click(object sender, EventArgs e)
+        {
+            thread_fibonacci.Abort();
+        }
+        private void Stop_Click(object sender, EventArgs e)
+        {
+            thread.Abort();
+        }
         private void Start_Click(object sender, EventArgs e)
         {
             uint start_number;
@@ -83,7 +147,8 @@ namespace Project_56.Forms
 
             if (text_end.Text == "" || text_end.Text == "0") end_number = 0u;
             else end_number = Convert.ToUInt32(text_end.Text);
-            new Thread(() => { Generation(start_number, end_number); }).Start();
+            thread = new Thread(() => { Generation(start_number, end_number); });
+            thread.Start();
         }
         private void StartFibonacci_Click(object sender, EventArgs e)
         {
@@ -94,7 +159,8 @@ namespace Project_56.Forms
 
             if (text_end.Text == "" || text_end.Text == "0") end_number = 0u;
             else end_number = Convert.ToUInt32(text_end.Text);
-            new Thread(() => { GenerationFibonacci(start_number, end_number); }).Start();
+            thread_fibonacci = new Thread(() => { GenerationFibonacci(start_number, end_number); });
+            thread_fibonacci.Start();
         }
         private void Generation(uint start_number, uint end_number)
         {
@@ -105,6 +171,7 @@ namespace Project_56.Forms
                     if (check_close_form) break;
                     if (IsPrimeNumber(i)) Invoke(new Action(() => { ChangeText(i.ToString()); }));
                     Thread.Sleep(100);
+                    manualReset.WaitOne();
                 }
             }
             else
@@ -115,6 +182,7 @@ namespace Project_56.Forms
                     if (IsPrimeNumber(i)) Invoke(new Action(() => { ChangeText(i.ToString()); }));
                     i++;
                     Thread.Sleep(100);
+                    manualReset.WaitOne();
                 }
             }
         }
@@ -127,6 +195,7 @@ namespace Project_56.Forms
                     if (check_close_form) break;
                     Invoke(new Action(() => { ChangeTextFibonacci(isFibonacci(i).ToString()); }));
                     Thread.Sleep(100);
+                    manualResetFibonacci.WaitOne();
                 }
             }
             else
@@ -137,6 +206,7 @@ namespace Project_56.Forms
                     Invoke(new Action(() => { ChangeTextFibonacci(isFibonacci(i).ToString()); }));
                     i++;
                     Thread.Sleep(100);
+                    manualResetFibonacci.WaitOne();
                 }
             }
         }

@@ -18,6 +18,7 @@ namespace Project_56
         private Button ButtonTask2 = new Button();
         private Button ButtonTask3 = new Button();
         private Button ButtonTask4 = new Button();
+        private Button ButtonTask5 = new Button();
         public Form1()
         {
             InitializeComponent();
@@ -42,10 +43,16 @@ namespace Project_56
             ButtonTask4.Location = new Point(50, 160);
             ButtonTask4.Click += Task4_Click;
 
+            ButtonTask5.Text = "Task 5";
+            ButtonTask5.Size = new Size(75, 23);
+            ButtonTask5.Location = new Point(50, 210);
+            ButtonTask5.Click += Task5_Click;
+
             Controls.Add(ButtonTask1);
             Controls.Add(ButtonTask2);
             Controls.Add(ButtonTask3);
             Controls.Add(ButtonTask4);
+            Controls.Add(ButtonTask5);
         }
         private void Task1_Click(object sender, EventArgs e)
         {
@@ -59,12 +66,17 @@ namespace Project_56
         }
         private void Task3_Click(object sender, EventArgs e)
         {
-            Task1 task = new Task1();
+            Task3 task = new Task3();
             task.ShowDialog();
         }
         private void Task4_Click(object sender, EventArgs e)
         {
-            Task1 task = new Task1();
+            Task4 task = new Task4();
+            task.ShowDialog();
+        }
+        private void Task5_Click(object sender, EventArgs e)
+        {
+            Task5 task = new Task5();
             task.ShowDialog();
         }
     }
