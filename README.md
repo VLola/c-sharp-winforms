@@ -1,3 +1,27 @@
+# Project 56.
+
+## Task 1:
+Set up a windowed application that generates a set
+prime numbers in a user-specified range.
+If no lower bound is specified, the stream starts at 2.
+If no upper bound is specified, generation occurs before the application terminates. Use the threading. 
+## Task 2
+Add to the first job a thread that generates
+set of Fibonacci numbers. The numbers must
+in the window interface.
+## Task 3
+Add buttons to the second task for complete
+stop each of the threads. One button for one
+flow. If the user clicked on the stop button,
+the thread completely loses its work.
+## Task 4
+The purpose of the button for pausing and resuming each of the threads. For example,
+the user can pause the generation of Fibonacci numbers by clicking on the button. Continuation of generation
+possible by pressing another button.
+## Task 5
+Required for the fourth task
+restarting streams.
+___
 # Project 48.
 
 Implement 2 forms
