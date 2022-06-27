@@ -1,3 +1,12 @@
+# Project 58.
+
+Write a program to control applications.
+
+Adding the application name to the lists:
+
+- List of programs that will close when opened
+- List of programs that will open when closed
+
 # Project 56.
 
 ## Task 1:
