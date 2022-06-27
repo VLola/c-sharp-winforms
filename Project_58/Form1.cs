@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -19,8 +20,8 @@ namespace Project_58
         TextBox errors = new TextBox();
         Button button_start = new Button();
         Button button_close = new Button();
-        List<string> start = new List<string>();
-        List<string> close = new List<string>();
+        public List<string> start { get; set; } = new List<string>();
+        public List<string> close { get; set; } = new List<string>();
         public Form1()
         {
             InitializeComponent();
@@ -105,25 +106,20 @@ namespace Project_58
                 {
                     while (true)
                     {
-                        List<string> list_start = new List<string>();
+                        string[] array = new string[0];
                         Invoke(new Action(() =>
                         {
-                            list_start = start;
+                            array = start.ToArray();
                         }));
-                        foreach (var iterator in list_start)
-                        {
-                            bool check_start = false;
-                            foreach (var it in Process.GetProcesses())
+                        if(array.Length > 0)
+                            foreach (var iterator in array)
                             {
-                                if (it.ProcessName == iterator)
-                                {
-                                    check_start = true;
-                                }
+                                bool check_start = false;
+                                foreach (var it in Process.GetProcesses()) if (it.ProcessName == iterator) check_start = true;
+                                if (!check_start) Process.Start(iterator);
+                                await Task.Delay(1000);
                             }
-                            if (!check_start) Process.Start(iterator);
-                            await Task.Delay(1000);
-                        }
-                        await Task.Delay(1000);
+                        await Task.Delay(1);
                     }
                 }
                 catch {
@@ -139,23 +135,18 @@ namespace Project_58
                 {
                     while (true)
                     {
-                        List<string> list_close = new List<string>();
+                        string[] array = new string[0];
                         Invoke(new Action(() =>
                         {
-                            list_close = close;
+                            array = close.ToArray();
                         }));
-                        foreach (var iterator in list_close)
-                        {
-                            foreach (var it in Process.GetProcesses())
+                        if (array.Length > 0)
+                            foreach (var iterator in array)
                             {
-                                if (it.ProcessName == iterator)
-                                {
-                                    it.Kill();
-                                }
+                                foreach (var it in Process.GetProcesses()) if (it.ProcessName == iterator) it.Kill();
+                                await Task.Delay(1000);
                             }
-                            await Task.Delay(1000);
-                        }
-                        await Task.Delay(1000);
+                        await Task.Delay(1);
                     }
                 }
                 catch {
