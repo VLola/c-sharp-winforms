@@ -261,7 +261,7 @@ namespace Project_56.Forms
                 {
                     if (check_close_form) break;
                     Invoke(new Action(() => { ChangeTextFibonacci(isFibonacci(i).ToString()); }));
-                    Thread.Sleep(100);
+                    Thread.Sleep(500);
                     manualResetFibonacci.WaitOne();
                 }
             }
@@ -272,7 +272,7 @@ namespace Project_56.Forms
                 {
                     Invoke(new Action(() => { ChangeTextFibonacci(isFibonacci(i).ToString()); }));
                     i++;
-                    Thread.Sleep(100);
+                    Thread.Sleep(500);
                     manualResetFibonacci.WaitOne();
                 }
             }
