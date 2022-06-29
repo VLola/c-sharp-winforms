@@ -16,6 +16,8 @@ namespace Project_58
     {
         Label label = new Label();
         Label label_errors = new Label();
+        Label label_start = new Label();
+        Label label_close = new Label();
         TextBox textBox = new TextBox();
         TextBox errors = new TextBox();
         Button button_start = new Button();
@@ -55,8 +57,17 @@ namespace Project_58
             button_close.Location = new Point(350, 15);
             button_close.Click += Button_close_Click;
 
+            label_start.Text = "White list:";
+            label_start.Location = new Point(20, 100);
+
+            label_close.Text = "Black list:";
+            label_close.Location = new Point(320, 100);
+
             list_start.Location = new Point(120, 100);
-            list_close.Location = new Point(400, 100);
+            list_start.Width = (Width / 2) - 150;
+            label_close.Location = new Point(list_start.Width + 150, 100);
+            list_close.Location = new Point(list_start.Width + 250, 100);
+            list_close.Width = (Width / 2) - 180;
 
             AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
             SizeChanged += Form1_SizeChanged;
@@ -69,6 +80,8 @@ namespace Project_58
             Controls.Add(button_close);
             Controls.Add(list_start);
             Controls.Add(list_close);
+            Controls.Add(label_start);
+            Controls.Add(label_close);
             StartProcessAsync();
             CloseProcessAsync();
         }
@@ -76,6 +89,10 @@ namespace Project_58
         private void Form1_SizeChanged(object sender, EventArgs e)
         {
             errors.Size = new Size(Width - 200, Height - 400);
+            list_start.Width = (Width / 2) - 150;
+            label_close.Location = new Point(list_start.Width + 150, 100);
+            list_close.Location = new Point(list_start.Width + 250, 100);
+            list_close.Width = (Width / 2) - 180;
         }
 
         private void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
@@ -93,7 +110,9 @@ namespace Project_58
                 start.Remove(textBox.Text);
                 list_start.Items.Clear();
                 list_start.Items.AddRange(start.ToArray());
-                close.Add(textBox.Text);
+                if(!close.Contains(textBox.Text)) close.Add(textBox.Text);
+                list_close.Items.Clear();
+                list_close.Items.AddRange(close.ToArray());
                 textBox.Text = "";
             }
         }
@@ -103,7 +122,9 @@ namespace Project_58
             if (textBox.Text != "")
             {
                 close.Remove(textBox.Text);
-                start.Add(textBox.Text);
+                list_close.Items.Clear();
+                list_close.Items.AddRange(close.ToArray());
+                if (!start.Contains(textBox.Text)) start.Add(textBox.Text);
                 list_start.Items.Clear();
                 list_start.Items.AddRange(start.ToArray());
                 textBox.Text = "";
