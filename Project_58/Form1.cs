@@ -139,11 +139,8 @@ namespace Project_58
                     while (true)
                     {
                         string[] array = new string[0];
-                        Invoke(new Action(() =>
-                        {
-                            array = start.ToArray();
-                        }));
-                        if(array.Length > 0)
+                        array = start.ToArray();
+                        if (array.Length > 0)
                             foreach (var iterator in array)
                             {
                                 bool check_start = false;
@@ -168,10 +165,7 @@ namespace Project_58
                     while (true)
                     {
                         string[] array = new string[0];
-                        Invoke(new Action(() =>
-                        {
-                            array = close.ToArray();
-                        }));
+                        array = close.ToArray();
                         if (array.Length > 0)
                             foreach (var iterator in array)
                             {
