@@ -1,3 +1,9 @@
+# Project 59.
+
+When the time limit for using the PC expires, desktop shortcuts should start moving randomly.
+When you click on the shortcut - it should be removed from the "desktop". 
+When there are no shortcuts left, the computer should turn off.
+___
 # Project 58.
 
 Write a program to control applications.
@@ -6,7 +12,7 @@ Adding the application name to the lists:
 
 - List of programs that will close when opened
 - List of programs that will open when closed
-
+___
 # Project 56.
 
 ## Task 1:
