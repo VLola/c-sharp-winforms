@@ -12,9 +12,15 @@ namespace Project_60.MyControls
 {
     public partial class FishControl : UserControl
     {
+        private int Step { get; set; } = 5;
+        private int X { get; set; }
+        private int Y { get; set; }
         private int FormWidth { get; set; }
         private int FormHeidth { get; set; }
-        private bool isRigth { get; set; } = true;
+        private bool _isUp { get; set; }
+        private bool _isDown { get; set; }
+        private bool _isRigth { get; set; }
+        private bool _isLeft { get; set; }
         private int Count = 0;
         private Timer timer = new Timer();
         private List<Image> RigthImages { get; set; }
@@ -35,6 +41,7 @@ namespace Project_60.MyControls
             pictureBox.Size = new Size(100, 100);
             pictureBox.BackColor = Color.Transparent;
             Controls.Add(pictureBox);
+            NextPoint();
             timer.Interval = 100;
             timer.Tick += Timer_Tick;
             timer.Start();
@@ -42,10 +49,6 @@ namespace Project_60.MyControls
         private void Timer_Tick(object sender, EventArgs e)
         {
             RelocationFish();
-            if (Count >= RigthImages.Count - 1) Count = 0;
-            else Count++;
-            if (isRigth) pictureBox.Image = RigthImages[Count];
-            else pictureBox.Image = LeftImages[Count];
         }
 
         private async void RelocationFish()
@@ -54,10 +57,69 @@ namespace Project_60.MyControls
         }
         private void FishMove()
         {
-            if (isRigth) Location = new Point(Location.X + 1, Location.Y);
-            else Location = new Point(Location.X - 1, Location.Y);
-            if (Location.X >= FormWidth - 100) isRigth = false;
-            if (Location.X <= 0) isRigth = true;
+            if (Count >= RigthImages.Count - 1) Count = 0;
+            else Count++;
+            if (_isRigth) pictureBox.Image = RigthImages[Count];
+            else if (_isLeft) pictureBox.Image = LeftImages[Count];
+            if (_isRigth && _isUp)
+            {
+                if(Location.X < X && Location.Y > Y) Location = new Point(Location.X + Step, Location.Y - Step);
+                else if(Location.X < X && Location.Y <= Y) Location = new Point(Location.X + Step, Location.Y);
+                else if(Location.X >= X && Location.Y > Y) Location = new Point(Location.X, Location.Y - Step);
+                else if(Location.X >= X && Location.Y <= Y) NextPoint();
+            }
+            else if (_isRigth && _isDown)
+            {
+                if (Location.X < X && Location.Y < Y) Location = new Point(Location.X + Step, Location.Y + Step);
+                else if (Location.X < X && Location.Y >= Y) Location = new Point(Location.X + Step, Location.Y);
+                else if (Location.X >= X && Location.Y < Y) Location = new Point(Location.X, Location.Y + Step);
+                else if (Location.X >= X && Location.Y >= Y) NextPoint();
+            }
+            else if (_isLeft && _isUp)
+            {
+                if (Location.X > X && Location.Y > Y) Location = new Point(Location.X - Step, Location.Y - Step);
+                else if (Location.X > X && Location.Y <= Y) Location = new Point(Location.X - Step, Location.Y);
+                else if (Location.X <= X && Location.Y > Y) Location = new Point(Location.X, Location.Y - Step);
+                else if (Location.X <= X && Location.Y <= Y) NextPoint();
+            }
+            else if (_isLeft && _isDown)
+            {
+                if (Location.X > X && Location.Y < Y) Location = new Point(Location.X - Step, Location.Y + Step);
+                else if (Location.X > X && Location.Y >= Y) Location = new Point(Location.X - Step, Location.Y);
+                else if (Location.X <= X && Location.Y < Y) Location = new Point(Location.X, Location.Y + Step);
+                else if (Location.X <= X && Location.Y >= Y) NextPoint();
+            }
+        }
+        private void NextPoint()
+        {
+            X = RandomNumber(0, FormWidth);
+            Y = RandomNumber(0, FormHeidth);
+            if (Location.X <= X)
+            {
+                _isLeft = false;
+                _isRigth = true;
+            }
+            else if (Location.X > X)
+            {
+                _isRigth = false;
+                _isLeft = true;
+            }
+            if (Location.Y >= Y)
+            {
+                _isDown = false;
+                _isUp = true;
+            }
+            else if (Location.Y < Y)
+            {
+                _isUp = false;
+                _isDown = true;
+            }
+        }
+        private static readonly Random random = new Random();
+        private static readonly object syncLock = new object();
+        public static int RandomNumber(int min, int max)
+        {
+            lock (syncLock) return random.Next(min, max);
         }
     }
 }

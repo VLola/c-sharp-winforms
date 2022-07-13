@@ -62,8 +62,8 @@ namespace Project_60
             left.Add(new Bitmap(Properties.Resources.green_left_4, new Size(100, 100)));
             left.Add(new Bitmap(Properties.Resources.green_left_5, new Size(100, 100)));
             left.Add(new Bitmap(Properties.Resources.green_left_6, new Size(100, 100)));
-            FishControl fishControl = new FishControl(rigth, left, Width, Height);
-            fishControl.Location = new Point(RandomNumber(0, Width), RandomNumber(0, Height));
+            FishControl fishControl = new FishControl(rigth, left, Width - 100, Height - 100);
+            fishControl.Location = new Point(RandomNumber(0, Width - 100), RandomNumber(0, Height - 100));
             Controls.Add(fishControl);
         }
         private static readonly Random random = new Random();
