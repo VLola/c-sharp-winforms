@@ -58,6 +58,12 @@
     <Compile Include="MyControls\FishControl.Designer.cs">
       <DependentUpon>FishControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="MyControls\FoodControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MyControls\FoodControl.Designer.cs">
+      <DependentUpon>FoodControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

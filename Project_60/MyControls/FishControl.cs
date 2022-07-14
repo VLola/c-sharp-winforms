@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -26,9 +28,11 @@ namespace Project_60.MyControls
         private List<Image> RigthImages { get; set; }
         private List<Image> LeftImages { get; set; }
         private PictureBox pictureBox { get; set; } = new PictureBox();
-        public FishControl(List<Image> rigth, List<Image> left, int width, int heidth)
+        public ObservableCollection<FoodControl> collection_control;
+        public FishControl(List<Image> rigth, List<Image> left, int width, int heidth, ref ObservableCollection<FoodControl> collection_control)
         {
             InitializeComponent();
+            this.collection_control = collection_control;
             FormWidth = width;
             FormHeidth = heidth;
             DoubleBuffered = true;
@@ -48,14 +52,23 @@ namespace Project_60.MyControls
         }
         private void Timer_Tick(object sender, EventArgs e)
         {
-            RelocationFish();
+            int LocationX = 0;
+            int LocationY = 0;
+            Invoke(new Action(()=> {
+                LocationX = Location.X;
+                LocationY = Location.Y;
+            }));
+            RelocationFish(LocationX, LocationY);
         }
 
-        private async void RelocationFish()
+        private async void RelocationFish(int LocationX, int LocationY)
         {
-            await Task.Run(FishMove);
+            await Task.Run(()=> {
+                FishMove(LocationX, LocationY);
+            });
+            
         }
-        private void FishMove()
+        private void FishMove(int LocationX, int LocationY)
         {
             if (Count >= RigthImages.Count - 1) Count = 0;
             else Count++;
@@ -63,37 +76,77 @@ namespace Project_60.MyControls
             else if (_isLeft) pictureBox.Image = LeftImages[Count];
             if (_isRigth && _isUp)
             {
-                if(Location.X < X && Location.Y > Y) Location = new Point(Location.X + Step, Location.Y - Step);
-                else if(Location.X < X && Location.Y <= Y) Location = new Point(Location.X + Step, Location.Y);
-                else if(Location.X >= X && Location.Y > Y) Location = new Point(Location.X, Location.Y - Step);
-                else if(Location.X >= X && Location.Y <= Y) NextPoint();
+                if (LocationX < X && LocationY > Y) NextLocation(LocationX + Step, LocationY - Step);
+                else if (LocationX < X && LocationY <= Y) NextLocation(LocationX + Step, Location.Y);
+                else if (LocationX >= X && LocationY > Y) NextLocation(LocationX, LocationY - Step);
+                else if (LocationX >= X && LocationY <= Y)
+                {
+                    if (_Move && collection_control.Count > 0) collection_control[0].Eaten = true;
+                     _Move = false;
+                    NextPoint();
+                }
             }
             else if (_isRigth && _isDown)
             {
-                if (Location.X < X && Location.Y < Y) Location = new Point(Location.X + Step, Location.Y + Step);
-                else if (Location.X < X && Location.Y >= Y) Location = new Point(Location.X + Step, Location.Y);
-                else if (Location.X >= X && Location.Y < Y) Location = new Point(Location.X, Location.Y + Step);
-                else if (Location.X >= X && Location.Y >= Y) NextPoint();
+                if (LocationX < X && LocationY < Y) NextLocation(LocationX + Step, LocationY + Step);
+                else if (LocationX < X && LocationY >= Y) NextLocation(LocationX + Step, LocationY);
+                else if (LocationX >= X && LocationY < Y) NextLocation(LocationX, LocationY + Step);
+                else if (LocationX >= X && LocationY >= Y)
+                {
+                    if (_Move && collection_control.Count > 0) collection_control[0].Eaten = true;
+                    _Move = false;
+                    NextPoint();
+                }
             }
             else if (_isLeft && _isUp)
             {
-                if (Location.X > X && Location.Y > Y) Location = new Point(Location.X - Step, Location.Y - Step);
-                else if (Location.X > X && Location.Y <= Y) Location = new Point(Location.X - Step, Location.Y);
-                else if (Location.X <= X && Location.Y > Y) Location = new Point(Location.X, Location.Y - Step);
-                else if (Location.X <= X && Location.Y <= Y) NextPoint();
+                if (LocationX > X && LocationY > Y) NextLocation(LocationX - Step, LocationY - Step);
+                else if (LocationX > X && LocationY <= Y) NextLocation(LocationX - Step, LocationY);
+                else if (LocationX <= X && LocationY > Y) NextLocation(LocationX, LocationY - Step);
+                else if (LocationX <= X && LocationY <= Y)
+                {
+                    if (_Move && collection_control.Count > 0) collection_control[0].Eaten = true;
+                    _Move = false;
+                    NextPoint();
+                }
             }
             else if (_isLeft && _isDown)
             {
-                if (Location.X > X && Location.Y < Y) Location = new Point(Location.X - Step, Location.Y + Step);
-                else if (Location.X > X && Location.Y >= Y) Location = new Point(Location.X - Step, Location.Y);
-                else if (Location.X <= X && Location.Y < Y) Location = new Point(Location.X, Location.Y + Step);
-                else if (Location.X <= X && Location.Y >= Y) NextPoint();
+                if (LocationX > X && LocationY < Y) NextLocation(LocationX - Step, LocationY + Step);
+                else if (LocationX > X && LocationY >= Y) NextLocation(LocationX - Step, LocationY);
+                else if (LocationX <= X && LocationY < Y) NextLocation(LocationX, LocationY + Step);
+                else if (LocationX <= X && LocationY >= Y)
+                {
+                    if (_Move && collection_control.Count > 0) collection_control[0].Eaten = true;
+                    _Move = false;
+                    NextPoint();
+                }
             }
         }
+        private void NextLocation(int LocationX, int LocationY)
+        {
+            Invoke(new Action(() => {
+                Location = new Point(LocationX, LocationY);
+            }));
+        }
+        bool _Move { get; set; }
         private void NextPoint()
         {
-            X = RandomNumber(0, FormWidth);
-            Y = RandomNumber(0, FormHeidth);
+            if (collection_control.Count > 0)
+            {
+                foreach (var item in collection_control)
+                {
+                    X = item.Location.X;
+                    Y = item.Location.Y;
+                    _Move = true;
+                    break;
+                }
+            }
+            if(!_Move)
+            {
+                X = RandomNumber(0, FormWidth);
+                Y = RandomNumber(0, FormHeidth);
+            }
             if (Location.X <= X)
             {
                 _isLeft = false;
