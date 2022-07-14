@@ -105,6 +105,7 @@
     <Content Include="Resources\fon.jpg" />
     <Content Include="Resources\Food\food_1.png" />
     <Content Include="Resources\Food\food_2.png" />
+    <Content Include="Resources\Form_Main.png" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

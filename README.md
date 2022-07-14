@@ -1,3 +1,12 @@
+# Project 60.
+
+Implement an interactive aquarium game with functionality:
+
+- Adding fish
+- Feeding the fish
+
+![Image text](https://raw.githubusercontent.com/VLola/c-sharp-winforms/master/Project_60/Resources/Form_Main.png)
+___
 # Project 59.
 
 When the time limit for using the PC expires, desktop shortcuts should start moving randomly.
