@@ -32,14 +32,19 @@ namespace Project_60.MyControls
         public FishControl(List<Image> rigth, List<Image> left, int width, int heidth, ref ObservableCollection<FoodControl> collection_control)
         {
             InitializeComponent();
+            Load += FishControl_Load;
             this.collection_control = collection_control;
             FormWidth = width;
             FormHeidth = heidth;
+            RigthImages = rigth;
+            LeftImages = left;
+        }
+
+        private void FishControl_Load(object sender, EventArgs e)
+        {
             DoubleBuffered = true;
             Size = new Size(100, 100);
             BackColor = Color.Transparent;
-            RigthImages = rigth;
-            LeftImages = left;
             pictureBox.Image = RigthImages[0];
             pictureBox.Location = new Point(0, 0);
             pictureBox.Size = new Size(100, 100);
@@ -50,6 +55,7 @@ namespace Project_60.MyControls
             timer.Tick += Timer_Tick;
             timer.Start();
         }
+
         private void Timer_Tick(object sender, EventArgs e)
         {
             int LocationX = 0;
@@ -136,10 +142,15 @@ namespace Project_60.MyControls
             {
                 foreach (var item in collection_control)
                 {
-                    X = item.Location.X;
-                    Y = item.Location.Y;
-                    _Move = true;
-                    break;
+                    if (!item.Selected && item.Ready)
+                    {
+                        item.Selected = true;
+                        X = item.Location.X;
+                        Y = item.Location.Y - 50;
+                        _Move = true;
+                        break;
+                    }
+                    
                 }
             }
             if(!_Move)

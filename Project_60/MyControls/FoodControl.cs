@@ -13,7 +13,7 @@ namespace Project_60.MyControls
 {
     public partial class FoodControl : UserControl
     {
-        public bool 
+        public bool Ready { get; set; }
         public bool Selected { get; set; }
         public bool Eaten { get; set; }
         private int FormHeigth { get; set; }
@@ -41,6 +41,7 @@ namespace Project_60.MyControls
             }
             else
             {
+                Ready = true;
                 timer.Stop();
             }
         }
