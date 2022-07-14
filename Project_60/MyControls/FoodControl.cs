@@ -23,11 +23,13 @@ namespace Project_60.MyControls
             FormHeigth = height;
             Location = new Point(location.Item1, location.Item2);
             BackColor = Color.Transparent;
-            Size = new Size(10, 10);
+            Size = new Size(20, 20);
             InitializeComponent();
             DoubleBuffered = true;
             PictureBox pictureBox = new PictureBox();
-            pictureBox.BackColor = Color.Red;
+            pictureBox.BackColor = Color.Transparent;
+            pictureBox.Image = RandomImage();
+            pictureBox.BackColor = Color.Transparent;
             Controls.Add(pictureBox);
             timer.Interval = 100;
             timer.Tick += Timer_Tick;
@@ -37,13 +39,19 @@ namespace Project_60.MyControls
         {
             if (Location.Y < FormHeigth)
             {
-                Location = new Point(Location.X, Location.Y + 1);
+                Location = new Point(Location.X, Location.Y + 5);
             }
             else
             {
                 Ready = true;
                 timer.Stop();
             }
+        }
+        private static readonly Random random = new Random();
+        public static Image RandomImage()
+        {
+            if (random.Next(1, 3) == 1) return new Bitmap(Properties.Resources.food_1, new Size(20, 20));
+            else return new Bitmap(Properties.Resources.food_2, new Size(20, 20));
         }
     }
 }

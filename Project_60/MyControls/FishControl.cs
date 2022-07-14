@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -14,6 +9,8 @@ namespace Project_60.MyControls
 {
     public partial class FishControl : UserControl
     {
+        private DateTime TimeDeath = DateTime.Now + TimeSpan.FromMinutes(2); 
+        private DateTime TimeHungry = DateTime.Now + TimeSpan.FromMinutes(1); 
         private int Step { get; set; } = 5;
         private int X { get; set; }
         private int Y { get; set; }
@@ -28,7 +25,8 @@ namespace Project_60.MyControls
         private List<Image> RigthImages { get; set; }
         private List<Image> LeftImages { get; set; }
         private PictureBox pictureBox { get; set; } = new PictureBox();
-        public ObservableCollection<FoodControl> collection_control;
+        private Label label = new Label();
+        private ObservableCollection<FoodControl> collection_control;
         public FishControl(List<Image> rigth, List<Image> left, int width, int heidth, ref ObservableCollection<FoodControl> collection_control)
         {
             InitializeComponent();
@@ -46,9 +44,13 @@ namespace Project_60.MyControls
             Size = new Size(100, 100);
             BackColor = Color.Transparent;
             pictureBox.Image = RigthImages[0];
-            pictureBox.Location = new Point(0, 0);
+            pictureBox.Location = new Point(0, 10);
             pictureBox.Size = new Size(100, 100);
             pictureBox.BackColor = Color.Transparent;
+
+            label.ForeColor = Color.White;
+            label.TextAlign = ContentAlignment.MiddleCenter;
+            Controls.Add(label);
             Controls.Add(pictureBox);
             NextPoint();
             timer.Interval = 100;
@@ -76,6 +78,8 @@ namespace Project_60.MyControls
         }
         private void FishMove(int LocationX, int LocationY)
         {
+            
+
             if (Count >= RigthImages.Count - 1) Count = 0;
             else Count++;
             if (_isRigth) pictureBox.Image = RigthImages[Count];
@@ -87,8 +91,7 @@ namespace Project_60.MyControls
                 else if (LocationX >= X && LocationY > Y) NextLocation(LocationX, LocationY - Step);
                 else if (LocationX >= X && LocationY <= Y)
                 {
-                    if (_Move && collection_control.Count > 0) collection_control[0].Eaten = true;
-                     _Move = false;
+                    if (_Move && collection_control.Count > 0) Eathen();
                     NextPoint();
                 }
             }
@@ -99,8 +102,7 @@ namespace Project_60.MyControls
                 else if (LocationX >= X && LocationY < Y) NextLocation(LocationX, LocationY + Step);
                 else if (LocationX >= X && LocationY >= Y)
                 {
-                    if (_Move && collection_control.Count > 0) collection_control[0].Eaten = true;
-                    _Move = false;
+                    if (_Move && collection_control.Count > 0) Eathen();
                     NextPoint();
                 }
             }
@@ -111,8 +113,7 @@ namespace Project_60.MyControls
                 else if (LocationX <= X && LocationY > Y) NextLocation(LocationX, LocationY - Step);
                 else if (LocationX <= X && LocationY <= Y)
                 {
-                    if (_Move && collection_control.Count > 0) collection_control[0].Eaten = true;
-                    _Move = false;
+                    if (_Move && collection_control.Count > 0) Eathen();
                     NextPoint();
                 }
             }
@@ -123,10 +124,21 @@ namespace Project_60.MyControls
                 else if (LocationX <= X && LocationY < Y) NextLocation(LocationX, LocationY + Step);
                 else if (LocationX <= X && LocationY >= Y)
                 {
-                    if (_Move && collection_control.Count > 0) collection_control[0].Eaten = true;
-                    _Move = false;
+                    if (_Move && collection_control.Count > 0) Eathen();
                     NextPoint();
                 }
+            }
+            if (TimeDeath < DateTime.Now) {
+                timer.Stop();
+                BeginInvoke(new Action(() => {
+                    Dispose();
+                }));
+            }
+            else if (TimeHungry < DateTime.Now)
+            {
+                Invoke(new Action(()=> {
+                    label.Text = "I'm hungry";
+                }));
             }
         }
         private void NextLocation(int LocationX, int LocationY)
@@ -134,6 +146,23 @@ namespace Project_60.MyControls
             Invoke(new Action(() => {
                 Location = new Point(LocationX, LocationY);
             }));
+        }
+        private void Eathen()
+        {
+            TimeHungry = DateTime.Now + TimeSpan.FromMinutes(1);
+            TimeDeath = DateTime.Now + TimeSpan.FromMinutes(2);
+            Invoke(new Action(() => {
+                label.Text = "";
+            }));
+            foreach (var item in collection_control)
+            {
+                if (item.Selected && item.Ready)
+                {
+                    item.Eaten = true;
+                    _Move = false;
+                    break;
+                }
+            }
         }
         bool _Move { get; set; }
         private void NextPoint()

@@ -103,6 +103,8 @@
     <Content Include="Resources\Fish\Green\green_rigth_5.png" />
     <Content Include="Resources\Fish\Green\green_rigth_6.png" />
     <Content Include="Resources\fon.jpg" />
+    <Content Include="Resources\Food\food_1.png" />
+    <Content Include="Resources\Food\food_2.png" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

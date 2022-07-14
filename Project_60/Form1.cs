@@ -28,7 +28,6 @@ namespace Project_60
             WindowState = FormWindowState.Maximized;
             DoubleBuffered = true;
             AddBackground();
-            AddButton();
             MouseClick += Form1_MouseClick;
 
             timer.Interval = 1000;
@@ -54,32 +53,23 @@ namespace Project_60
 
         private void Form1_MouseClick(object sender, MouseEventArgs e)
         {
-            FoodControl foodControl = new FoodControl((e.X, e.Y), Height - 100);
-            collection_control.Add(foodControl);
-            Controls.Add(collection_control[collection_control.Count - 1]);
+            if (e.Button == MouseButtons.Left) AddFish(e.X, e.Y);
+            else if (e.Button == MouseButtons.Right) AddFood(e.X, e.Y);
+            
         }
 
-        private void AddButton()
-        {
-            Button button = new Button();
-            button.Location = new Point(10, 10);
-            button.Text = "add fish";
-            button.AutoSize = true;
-            button.Click += Button_Click;
-            Controls.Add(button);
-        }
-
-        private void Button_Click(object sender, EventArgs e)
-        {
-            AddFish();
-        }
-        
         private void AddBackground()
         {
             Bitmap objBitmap = new Bitmap(Properties.Resources.fon, new Size(Width, Height));
             BackgroundImage = objBitmap;
         }
-        private void AddFish()
+        private void AddFood(int X, int Y)
+        {
+            FoodControl foodControl = new FoodControl((X, Y), Height - 150);
+            collection_control.Add(foodControl);
+            Controls.Add(collection_control[collection_control.Count - 1]);
+        }
+        private void AddFish(int X, int Y)
         {
             List<Image> rigth = new List<Image>();
             rigth.Add(new Bitmap(Properties.Resources.green_rigth_1, new Size(100, 100)));
@@ -96,14 +86,8 @@ namespace Project_60
             left.Add(new Bitmap(Properties.Resources.green_left_5, new Size(100, 100)));
             left.Add(new Bitmap(Properties.Resources.green_left_6, new Size(100, 100)));
             FishControl fishControl = new FishControl(rigth, left, Width - 100, Height - 100, ref collection_control);
-            fishControl.Location = new Point(RandomNumber(0, Width - 100), RandomNumber(0, Height - 100));
+            fishControl.Location = new Point(X, Y);
             Controls.Add(fishControl);
-        }
-        private static readonly Random random = new Random();
-        private static readonly object syncLock = new object();
-        public static int RandomNumber(int min, int max)
-        {
-            lock (syncLock) return random.Next(min, max);
         }
     }
 }
