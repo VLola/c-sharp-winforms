@@ -45,25 +45,29 @@ string Calculate(string message)
 {
     (string x, string y, string symbol) variable = JsonConvert.DeserializeObject<(string x, string y, string symbol)>(message);
     string answer = "";
-    double? x = Double.Parse(variable.x);
-    double? y = Double.Parse(variable.y);
-    if (x != null && y != null)
+    try
+    {
+        double x = Double.Parse(variable.x);
+        double y = Double.Parse(variable.y);
         switch (variable.symbol)
         {
             case "+":
-                answer = ((double)x + (double)y).ToString();
+                answer = (x + y).ToString();
                 break;
             case "-":
-                answer = ((double)x - (double)y).ToString();
+                answer = (x - y).ToString();
                 break;
             case "/":
-                answer = ((double)x / (double)y).ToString();
+                answer = (x / y).ToString();
                 break;
             case "*":
-                answer = ((double)x * (double)y).ToString();
+                answer = (x * y).ToString();
                 break;
             default:
                 break;
         }
-    return "" + answer;
+    }
+    catch { }
+    
+    return answer;
 }
