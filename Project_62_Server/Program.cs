@@ -24,6 +24,7 @@ try
             builder.Append(Encoding.Unicode.GetString(buffer, 0, bytes));
         } while (clientSocket.Available > 0);
         byte[] data = Encoding.Unicode.GetBytes(Calculate(builder.ToString()));
+        Console.WriteLine("jndtn");
         clientSocket.Send(data);
         clientSocket.Shutdown(SocketShutdown.Both);
         clientSocket.Close();
@@ -43,18 +44,27 @@ Console.ReadLine();
 
 string Calculate(string message)
 {
-    (double x, double y, string symbol) variable = JsonConvert.DeserializeObject<(double x, double y, string symbol)>(message);
-    switch (variable.symbol)
-    {
-        case "+":
-            return (variable.x + variable.y).ToString();
-        case "-":
-            return (variable.x - variable.y).ToString();
-        case "/":
-            return (variable.x / variable.y).ToString();
-        case "*":
-            return (variable.x * variable.y).ToString();
-        default : 
-            return "";
-    }
+    (string x, string y, string symbol) variable = JsonConvert.DeserializeObject<(string x, string y, string symbol)>(message);
+    string answer = "";
+    double? x = Double.Parse(variable.x);
+    double? y = Double.Parse(variable.y);
+    if (x != null && y != null)
+        switch (variable.symbol)
+        {
+            case "+":
+                answer = ((double)x + (double)y).ToString();
+                break;
+            case "-":
+                answer = ((double)x - (double)y).ToString();
+                break;
+            case "/":
+                answer = ((double)x / (double)y).ToString();
+                break;
+            case "*":
+                answer = ((double)x * (double)y).ToString();
+                break;
+            default:
+                break;
+        }
+    return "" + answer;
 }

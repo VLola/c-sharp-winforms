@@ -51,7 +51,7 @@ namespace Project_62_Client
             try {
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 socket.Connect(iPEnd);
-                (double x, double y, string symbol) variable = (Double.Parse(X.Text), Double.Parse(Y.Text), Symbols.Text);
+                (string x, string y, string symbol) variable = (X.Text, Y.Text, Symbols.Text);
                 string message = JsonConvert.SerializeObject(variable);
 
                 byte[] data = Encoding.Unicode.GetBytes(message);
