@@ -24,7 +24,6 @@ try
             builder.Append(Encoding.Unicode.GetString(buffer, 0, bytes));
         } while (clientSocket.Available > 0);
         byte[] data = Encoding.Unicode.GetBytes(Calculate(builder.ToString()));
-        Console.WriteLine("jndtn");
         clientSocket.Send(data);
         clientSocket.Shutdown(SocketShutdown.Both);
         clientSocket.Close();
