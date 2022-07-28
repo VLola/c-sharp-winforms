@@ -1,4 +1,4 @@
-﻿namespace Project_62_ClientSocket
+﻿namespace Project_62_Client
 {
     partial class Form1
     {
