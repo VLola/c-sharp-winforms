@@ -11,12 +11,13 @@ namespace Project_66_Client.Controller
     public class GameController
     {
         GameView _gameView;
-        TankView _tankView;
+        TankController _tankController;
         public GameController(GameView gameView)
         {
             _gameView = gameView;
-            _tankView = new TankView();
-            _gameView.Controls.Add(_tankView);
+            TankView tankView = new();
+            _tankController = new(tankView, new TankModel());
+            _gameView.Controls.Add(tankView);
             _gameView.PreviewKeyDown += _gameView_PreviewKeyDown;
         }
 
@@ -24,23 +25,31 @@ namespace Project_66_Client.Controller
         {
             if (e.KeyCode == Keys.Up)
             {
-                //_gameView._tankModel.Direction = "Up";
-                if (_tankView.Location.Y > 0) _tankView.Location = new Point(_tankView.Location.X, _tankView.Location.Y - 1);
+                if (_tankController.GetLocationY() > 0) 
+                {
+                    _tankController.Up();
+                }
             }
             else if (e.KeyCode == Keys.Down)
             {
-                //_gameView._tankModel.Direction = "Down";
-                if (_tankView.Location.Y < _gameView.Height - 50) _tankView.Location = new Point(_tankView.Location.X, _tankView.Location.Y + 1);
+                if (_tankController.GetLocationY() < _gameView.Height - 50)
+                {
+                    _tankController.Down();
+                }
             }
             else if (e.KeyCode == Keys.Left)
             {
-                //_gameView._tankModel.Direction = "Left";
-                if (_tankView.Location.X > 0) _tankView.Location = new Point(_tankView.Location.X - 1, _tankView.Location.Y);
+                if (_tankController.GetLocationX() > 0)
+                {
+                    _tankController.Left();
+                }
             }
             else if (e.KeyCode == Keys.Right)
             {
-                //_gameView._tankModel.Direction = "Right";
-                if (_tankView.Location.X < _gameView.Width - 50) _tankView.Location = new Point(_tankView.Location.X + 1, _tankView.Location.Y);
+                if (_tankController.GetLocationX() < _gameView.Width - 50)
+                {
+                    _tankController.Right();
+                }
             }
             else if (e.KeyCode == Keys.Space)
             {
@@ -49,7 +58,7 @@ namespace Project_66_Client.Controller
         }
         private void Shot()
         {
-            
+            BulletModel bulletModel = new(_tankController.GetTankModel(), _gameView.Width, _gameView.Height);
         }
     }
 }
