@@ -1,14 +1,15 @@
-﻿namespace Project_66_Server.Model
+﻿using System.Collections.Generic;
+using System.Net.Sockets;
+
+namespace Project_66_Server.Model
 {
     internal class RoomModel
     {
-        public int Id { get; set; } 
-        public List<string> Users { get; set; }
-        public RoomModel(int id, List<string> users)
-        {
-            Id = id;
-            Users = users;
-        }
+        public int Id { get; set; }
+        public int Size { get; set; }
+        public List<Socket> Sockets { get; set; }
+        public List<TankModel> Tanks { get; set; }
+        public List<TankModel> Bullets { get; set; }
         public override string ToString()
         {
             return "Room " + Id;

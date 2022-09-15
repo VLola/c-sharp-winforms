@@ -1,4 +1,4 @@
-﻿namespace Project_66_Client.Model
+﻿namespace Project_66_Server.Model
 {
     public class TankModel
     {
@@ -6,5 +6,9 @@
         public string Direction { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

@@ -1,6 +1,8 @@
-﻿namespace Project_66_Client.View
+﻿using Project_66_Client.Model;
+
+namespace Project_66_Client.View
 {
-    internal class TankView : Control
+    public class TankView : Control
     {
         public TankView()
         {
@@ -20,6 +22,10 @@
             Rectangle rectangle = new Rectangle(0, 0, Width - 1, Height - 1);
             graphics.DrawRectangle(new Pen(Color.Orange), rectangle);
             graphics.FillRectangle(new SolidBrush(BackColor), rectangle);
+        }
+        public void Loading(TankModel tankModel)
+        {
+            Location = new(tankModel.X, tankModel.Y);
         }
     }
 }

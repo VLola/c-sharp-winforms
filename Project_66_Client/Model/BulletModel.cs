@@ -59,7 +59,7 @@
         public BulletModel() { }
         public BulletModel(TankModel tankModel, int maxX, int maxY)
         {
-            FirstName = tankModel.FirstName;
+            FirstName = tankModel.Name;
             Direction = tankModel.Direction;
             X = tankModel.X;
             Y = tankModel.Y;

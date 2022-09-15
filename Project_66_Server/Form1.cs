@@ -1,5 +1,6 @@
-using Project_66_Server.Controller;
+﻿using Project_66_Server.Controller;
 using Project_66_Server.View;
+using System.Windows.Forms;
 
 namespace Project_66_Server
 {
@@ -10,8 +11,8 @@ namespace Project_66_Server
         public Form1()
         {
             InitializeComponent();
-            _gameView = new();
-            _gameController = new(_gameView);
+            _gameView = new GameView();
+            _gameController = new GameController(_gameView);
             Controls.Add(_gameView);
         }
     }
