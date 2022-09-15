@@ -25,7 +25,24 @@ namespace Project_66_Client.View
         }
         public void Loading(TankModel tankModel)
         {
-            Location = new(tankModel.X, tankModel.Y);
+            try
+            {
+                if (InvokeRequired)
+                {
+                    Invoke(new Action(() =>
+                    {
+                        Location = new(tankModel.X, tankModel.Y);
+                    }));
+                }
+                else
+                {
+                    Location = new(tankModel.X, tankModel.Y);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
     }
 }

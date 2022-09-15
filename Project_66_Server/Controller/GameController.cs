@@ -21,7 +21,6 @@ namespace Project_66_Server.Controller
             _gameView = gameView;
             Listen();
         }
-
         void Listen()
         {
             Task.Run(() => {
@@ -35,7 +34,6 @@ namespace Project_66_Server.Controller
                 }
             });
         }
-
         void ConnectClient(Socket clientSocket)
         {
             Task.Run(() => {
@@ -109,7 +107,11 @@ namespace Project_66_Server.Controller
 
                                 foreach (var item in roomModel.Sockets)
                                 {
-                                    item.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
+                                    try
+                                    {
+                                        item.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
+                                    }
+                                    catch { }
                                 }
                             }
                         }
@@ -118,24 +120,11 @@ namespace Project_66_Server.Controller
                 }
             });
         }
-        private int GetPlayerId(string name)
-        {
-            foreach (RoomModel item in _gameView.Games.Items)
-            {
-                int i = 0;
-                foreach (var it in item.Tanks)
-                {
-                    if (it.Name == name) return i;
-                    i++;
-                }
-            }
-            return 0;
-        }
         private RoomModel GetRoom(int size)
         {
             foreach (RoomModel item in _gameView.Games.Items)
             {
-                if (item.Size == size) return item;
+                if (item.Size == size && item.Tanks.Count < size) return item;
             }
             RoomModel roomModel = new RoomModel();
             roomModel.Id = _room++;
