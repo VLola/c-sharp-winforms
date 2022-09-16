@@ -39,7 +39,6 @@ namespace Project_66_Client.Controller
             try
             {
                 _clientController.SetName(_gameView.LoginView.FirstName.Text);
-
                 _gameView.Invoke(new Action(() => {
                     _gameView.LoginView.FirstName.Text = "";
                 }));
@@ -52,11 +51,15 @@ namespace Project_66_Client.Controller
                 {
                     _clientController.SetIsRegister(true);
                     SendClient();
+                    _clientController.SetIsLogin(false);
+                    _clientController.SetPassword("");
                 }
                 else if (_gameView.LoginView.IsLogin.Checked == true)
                 {
                     _clientController.SetIsLogin(true);
                     SendClient();
+                    _clientController.SetIsLogin(false);
+                    _clientController.SetPassword("");
                 }
             }
             catch (Exception ex)
@@ -98,6 +101,7 @@ namespace Project_66_Client.Controller
                     _clientController.Up();
                     _clientController.SetIsDirection(true);
                     SendClient();
+                    _clientController.SetIsDirection(false);
                 }
             }
             else if (e.KeyCode == Keys.Down)
@@ -107,6 +111,7 @@ namespace Project_66_Client.Controller
                     _clientController.Down();
                     _clientController.SetIsDirection(true);
                     SendClient();
+                    _clientController.SetIsDirection(false);
                 }
             }
             else if (e.KeyCode == Keys.Left)
@@ -116,6 +121,7 @@ namespace Project_66_Client.Controller
                     _clientController.Left();
                     _clientController.SetIsDirection(true);
                     SendClient();
+                    _clientController.SetIsDirection(false);
                 }
             }
             else if (e.KeyCode == Keys.Right)
@@ -125,27 +131,25 @@ namespace Project_66_Client.Controller
                     _clientController.Right();
                     _clientController.SetIsDirection(true);
                     SendClient();
+                    _clientController.SetIsDirection(false);
                 }
             }
             else if (e.KeyCode == Keys.Space)
             {
-                Shot();
+                _clientController.SetIsShot(true);
+                SendClient();
+                _clientController.SetIsShot(false);
             }
-        }
-        private void Shot()
-        {
-
         }
         private void SendClient()
         {
             try
             {
                 _socket.Send(Encoding.Unicode.GetBytes(JsonSerializer.Serialize(_clientController.GetClient())));
-                _clientController.ClearValues();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("6");
+                MessageBox.Show(ex.ToString());
             }
         }
 
@@ -182,7 +186,15 @@ namespace Project_66_Client.Controller
                                     if (client.Login)
                                     {
                                         _gameView.LoginHidden();
-                                        _roomController.Loading(client.Tanks);
+                                        foreach (var item in client.Tanks)
+                                        {
+                                            if(item.Name == _clientController.GetName())
+                                            {
+                                                _clientController.SetDirection(item.Direction);
+                                                _clientController.SetLocationX(item.X);
+                                                _clientController.SetLocationY(item.Y);
+                                            }
+                                        }
                                     }
                                     else MessageBox.Show("Login error!");
                                 }
@@ -190,15 +202,24 @@ namespace Project_66_Client.Controller
                                 {
                                     if (client.Login)
                                     {
-                                        _gameView.LoginHidden();
-                                        _roomController.Loading(client.Tanks);
+                                        _gameView.LoginHidden(); 
+                                        foreach (var item in client.Tanks)
+                                        {
+                                            if (item.Name == _clientController.GetName())
+                                            {
+                                                _clientController.SetDirection(item.Direction);
+                                                _clientController.SetLocationX(item.X);
+                                                _clientController.SetLocationY(item.Y);
+                                            }
+                                        }
                                     }
                                     else MessageBox.Show("Register error!");
                                 }
-                                else if (client.IsDirection)
+                                Task.Run(() =>
                                 {
-                                    _roomController.Loading(client.Tanks);
-                                }
+                                    _roomController.LoadTanks(client.Tanks);
+                                    _roomController.LoadBullets(client.Bullets);
+                                });
                             }
                         }
                     }

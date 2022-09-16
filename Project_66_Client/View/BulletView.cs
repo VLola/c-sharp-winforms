@@ -2,18 +2,17 @@
 
 namespace Project_66_Client.View
 {
-    public class TankView : Control
+    internal class BulletView : Control
     {
-        public TankView()
+        public int Id;
+        public BulletView()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor | ControlStyles.UserPaint, true);
             DoubleBuffered = true;
-            Location = new Point(-100, 0);
-            Size = new Size(50, 50);
-            BackColor = Color.Red;
+            Size = new Size(5, 5);
+            BackColor = Color.Black;
             Enabled = false;
         }
-
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -21,10 +20,10 @@ namespace Project_66_Client.View
             graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             graphics.Clear(Parent.BackColor);
             Rectangle rectangle = new Rectangle(0, 0, Width - 1, Height - 1);
-            graphics.DrawRectangle(new Pen(Color.Orange), rectangle);
+            graphics.DrawRectangle(new Pen(Color.Black), rectangle);
             graphics.FillRectangle(new SolidBrush(BackColor), rectangle);
         }
-        public void Loading(TankModel tankModel)
+        public void Loading(BulletModel value)
         {
             try
             {
@@ -32,12 +31,14 @@ namespace Project_66_Client.View
                 {
                     Invoke(new Action(() =>
                     {
-                        Location = new(tankModel.X, tankModel.Y);
+                        Id = value.Id;
+                        Location = new(value.X, value.Y);
                     }));
                 }
                 else
                 {
-                    Location = new(tankModel.X, tankModel.Y);
+                    Id = value.Id;
+                    Location = new(value.X, value.Y);
                 }
             }
             catch (Exception ex)

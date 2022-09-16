@@ -22,7 +22,7 @@ namespace Project_66_Client.Controller
             _roomView.Controls.Add(_tankView3);
             _roomView.Controls.Add(_tankView4);
         }
-        public void Loading(List<TankModel> tankModels)
+        public void LoadTanks(List<TankModel> tankModels)
         {
             if (tankModels.Count == 1)
             {
@@ -45,6 +45,65 @@ namespace Project_66_Client.Controller
                 _tankView2.Loading(tankModels[1]);
                 _tankView3.Loading(tankModels[2]);
                 _tankView4.Loading(tankModels[3]);
+            }
+        }
+        public void LoadBullets(List<BulletModel> value)
+        {
+            try
+            {
+                if (_roomView.InvokeRequired)
+                {
+                    _roomView.Invoke(new Action(() =>
+                    {
+                        foreach (var it in value)
+                        {
+                            bool check = false;
+                            foreach (Control bulletView in _roomView.Controls)
+                            {
+                                if(it.Id.ToString() == bulletView.Name)
+                                {
+                                    bulletView.Location = new(it.X, it.Y);
+                                    check = true;
+                                    break;
+                                }
+                            }
+                            if (!check)
+                            {
+                                BulletView bulletView = new BulletView();
+                                bulletView.Name = it.Id.ToString();
+                                bulletView.Location = new(it.X, it.Y);
+                                _roomView.Controls.Add(bulletView);
+                            }
+                        }
+                    }));
+                }
+                else
+                {
+                    foreach (var it in value)
+                    {
+                        bool check = false;
+                        foreach (Control bulletView in _roomView.Controls)
+                        {
+                            if (it.Id.ToString() == bulletView.Name)
+                            {
+                                bulletView.Location = new(it.X, it.Y);
+                                check = true;
+                                break;
+                            }
+                        }
+                        if (!check)
+                        {
+                            BulletView bulletView = new BulletView();
+                            bulletView.Name = it.Id.ToString();
+                            bulletView.Location = new(it.X, it.Y);
+                            _roomView.Controls.Add(bulletView);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
             }
         }
     }

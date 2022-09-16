@@ -13,6 +13,6 @@ namespace Project_66_Server.Model
         public string Password { get; set; }
         public TankModel Tank { get; set; }
         public List<TankModel> Tanks { get; set; }
-        public List<TankModel> Bullets { get; set; }
+        public List<BulletModel> Bullets { get; set; }
     }
 }
