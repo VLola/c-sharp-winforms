@@ -1,4 +1,5 @@
 ﻿using Project_66_Client.Model;
+using System.Drawing.Drawing2D;
 
 namespace Project_66_Client.View
 {
@@ -8,42 +9,54 @@ namespace Project_66_Client.View
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor | ControlStyles.UserPaint, true);
             DoubleBuffered = true;
-            Location = new Point(-100, 0);
+            Location = new Point(0, 0);
             Size = new Size(50, 50);
-            BackColor = Color.Red;
             Enabled = false;
+            BackColor = Color.ForestGreen;
         }
-
-        protected override void OnPaint(PaintEventArgs e)
+        public void Death()
         {
-            base.OnPaint(e);
-            Graphics graphics = e.Graphics;
-            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-            graphics.Clear(Parent.BackColor);
-            Rectangle rectangle = new Rectangle(0, 0, Width - 1, Height - 1);
-            graphics.DrawRectangle(new Pen(Color.Orange), rectangle);
-            graphics.FillRectangle(new SolidBrush(BackColor), rectangle);
+            BackColor = Color.Gray;
         }
-        public void Loading(TankModel tankModel)
+        public void Life()
         {
-            try
-            {
-                if (InvokeRequired)
-                {
-                    Invoke(new Action(() =>
-                    {
-                        Location = new(tankModel.X, tankModel.Y);
-                    }));
-                }
-                else
-                {
-                    Location = new(tankModel.X, tankModel.Y);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
+            BackColor = Color.ForestGreen;
+        }
+        public void Up()
+        {
+            GraphicsPath myGraphicsPath = new GraphicsPath();
+            myGraphicsPath.AddRectangle(new Rectangle(0, 5, 10, 44));
+            myGraphicsPath.AddRectangle(new Rectangle(39, 5, 10, 44));
+            myGraphicsPath.AddRectangle(new Rectangle(22, 0, 5, 8));
+            myGraphicsPath.AddEllipse(new Rectangle(8, 8, 32, 32));
+            Region = new Region(myGraphicsPath);
+        }
+        public void Down()
+        {
+            GraphicsPath myGraphicsPath = new GraphicsPath();
+            myGraphicsPath.AddRectangle(new Rectangle(0, 0, 10, 44));
+            myGraphicsPath.AddRectangle(new Rectangle(39, 0, 10, 44));
+            myGraphicsPath.AddRectangle(new Rectangle(22, 40, 5, 8));
+            myGraphicsPath.AddEllipse(new Rectangle(8, 8, 32, 32));
+            Region = new Region(myGraphicsPath);
+        }
+        public void IsRight()
+        {
+            GraphicsPath myGraphicsPath = new GraphicsPath();
+            myGraphicsPath.AddRectangle(new Rectangle(0, 0, 44, 10));
+            myGraphicsPath.AddRectangle(new Rectangle(0, 39, 44, 10));
+            myGraphicsPath.AddRectangle(new Rectangle(40, 22, 8, 5));
+            myGraphicsPath.AddEllipse(new Rectangle(8, 8, 32, 32));
+            Region = new Region(myGraphicsPath);
+        }
+        public void IsLeft()
+        {
+            GraphicsPath myGraphicsPath = new GraphicsPath();
+            myGraphicsPath.AddRectangle(new Rectangle(5, 0, 44, 10));
+            myGraphicsPath.AddRectangle(new Rectangle(5, 39, 44, 10));
+            myGraphicsPath.AddRectangle(new Rectangle(0, 22, 8, 5));
+            myGraphicsPath.AddEllipse(new Rectangle(8, 8, 32, 32));
+            Region = new Region(myGraphicsPath);
         }
     }
 }

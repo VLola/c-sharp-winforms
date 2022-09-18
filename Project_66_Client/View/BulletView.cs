@@ -10,7 +10,7 @@ namespace Project_66_Client.View
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor | ControlStyles.UserPaint, true);
             DoubleBuffered = true;
             Size = new Size(5, 5);
-            BackColor = Color.Black;
+            BackColor = Color.White;
             Enabled = false;
         }
         protected override void OnPaint(PaintEventArgs e)

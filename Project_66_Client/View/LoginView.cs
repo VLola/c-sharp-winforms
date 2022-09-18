@@ -2,47 +2,44 @@
 {
     public partial class LoginView : UserControl
     {
-        public TextBox Password = new TextBox();
-        public TextBox FirstName = new TextBox();
-        public Button Login = new Button();
-        public RadioButton IsLogin = new RadioButton();
-        public RadioButton IsRegister = new RadioButton();
-        public ComboBox Players = new ComboBox();
+        public TextBox Password = new();
+        public TextBox FirstName = new();
+        public Button Login = new();
+        public RadioButton IsLogin = new();
+        public RadioButton IsRegister = new();
         public LoginView()
         {
             InitializeComponent();
-            Location = new Point(300, 100);
+            Location = new(350, 150);
             AutoSize = true;
-            Label labelName = new Label();
+
+            Label labelName = new();
             labelName.Text = "Name:";
-            labelName.Location = new Point(0, 5);
-            Label labelPass = new Label();
+            labelName.Location = new(0, 5);
+
+            Label labelPass = new();
             labelPass.Text = "Password:";
-            labelPass.Location = new Point(0, 55);
-            FirstName.Location = new Point(100, 0);
-            Password.Location = new Point(100, 50);
+            labelPass.Location = new(0, 55);
+
+            FirstName.Location = new(100, 0);
+
+            Password.Location = new(100, 50);
             Password.UseSystemPasswordChar = true;
-            Label labelPlayers = new Label();
-            labelPlayers.Text = "Players:";
-            labelPlayers.Location = new Point(0, 105);
-            Players.Location = new Point(100, 100);
-            Players.Items.Add(2);
-            Players.Items.Add(3);
-            Players.Items.Add(4);
-            Players.Size = new Size(100, 20);
-            Players.SelectedIndex = 0;
+
             IsRegister.Text = "Register";
-            IsRegister.Location = new Point(20, 150);
+            IsRegister.Location = new(20, 100);
+
             IsLogin.Text = "Login";
             IsLogin.Checked = true;
-            IsLogin.Location = new Point(120, 150);
+            IsLogin.Location = new(120, 100);
+
             Login.Text = "Click";
-            Login.Location = new Point(60, 200);
+            Login.Location = new(60, 150);
+
+
             Controls.Add(labelPass);
             Controls.Add(labelName);
             Controls.Add(FirstName);
-            Controls.Add(labelPlayers);
-            Controls.Add(Players);
             Controls.Add(IsLogin);
             Controls.Add(IsRegister);
             Controls.Add(Password);

@@ -6,45 +6,73 @@ namespace Project_66_Client.Controller
     internal class RoomController
     {
         RoomView _roomView;
-        TankView _tankView1;
-        TankView _tankView2;
-        TankView _tankView3;
-        TankView _tankView4;
+        List<int> _deleteBullets = new List<int>();
+        List<TankController> tankControllers = new List<TankController>();
         public RoomController(RoomView roomView)
         {
             _roomView = roomView;
-            _tankView1 = new();
-            _tankView2 = new();
-            _tankView3 = new();
-            _tankView4 = new();
-            _roomView.Controls.Add(_tankView1);
-            _roomView.Controls.Add(_tankView2);
-            _roomView.Controls.Add(_tankView3);
-            _roomView.Controls.Add(_tankView4);
         }
         public void LoadTanks(List<TankModel> tankModels)
         {
-            if (tankModels.Count == 1)
+            // Add
+            lock (tankModels) foreach (var item in tankModels)
             {
-                _tankView1.Loading(tankModels[0]);
+                    if (!CheckName(item.Name)) { 
+                        lock (tankControllers) tankControllers.Add(new TankController(_roomView, new TankView(), item)); 
+                    }
+                    else
+                    {
+                        LoadTank(item);
+                    }
             }
-            else if (tankModels.Count == 2)
+            // Delete
+            int i = 0;
+            bool check = false;
+            lock(tankControllers) foreach (var item in tankControllers)
             {
-                _tankView1.Loading(tankModels[0]);
-                _tankView2.Loading(tankModels[1]);
+                    if (!CheckDeleteName(item.Name, tankModels)) {
+                        check = true;
+                        break;
+                    }
+                    i++;
             }
-            else if (tankModels.Count == 3)
+            if (check) 
+                lock (tankControllers)
+                {
+                    tankControllers[i].DisposeTank();
+                    tankControllers.RemoveAt(i);
+                }
+        }
+        private void LoadTank(TankModel tankModel)
+        {
+            lock (tankControllers)
             {
-                _tankView1.Loading(tankModels[0]);
-                _tankView2.Loading(tankModels[1]);
-                _tankView3.Loading(tankModels[2]);
+                foreach (var item in tankControllers)
+                {
+                    if (item.Name == tankModel.Name) item.Load(tankModel);
+                }
             }
-            else if (tankModels.Count == 4)
+        }
+        private bool CheckDeleteName(string name, List<TankModel> tankModels)
+        {
+            lock (tankModels)
             {
-                _tankView1.Loading(tankModels[0]);
-                _tankView2.Loading(tankModels[1]);
-                _tankView3.Loading(tankModels[2]);
-                _tankView4.Loading(tankModels[3]);
+                foreach (var item in tankModels)
+                {
+                    if (item.Name == name) return true;
+                }
+                return false;
+            }
+        }
+        private bool CheckName(string name)
+        {
+            lock (tankControllers)
+            {
+                foreach (var item in tankControllers)
+                {
+                    if (item.Name == name) return true;
+                }
+                return false;
             }
         }
         public void LoadBullets(List<BulletModel> value)
@@ -55,55 +83,68 @@ namespace Project_66_Client.Controller
                 {
                     _roomView.Invoke(new Action(() =>
                     {
-                        foreach (var it in value)
-                        {
-                            bool check = false;
-                            foreach (Control bulletView in _roomView.Controls)
-                            {
-                                if(it.Id.ToString() == bulletView.Name)
-                                {
-                                    bulletView.Location = new(it.X, it.Y);
-                                    check = true;
-                                    break;
-                                }
-                            }
-                            if (!check)
-                            {
-                                BulletView bulletView = new BulletView();
-                                bulletView.Name = it.Id.ToString();
-                                bulletView.Location = new(it.X, it.Y);
-                                _roomView.Controls.Add(bulletView);
-                            }
-                        }
+                        AddBullet(value);
+                        DeleteBullet(value);
                     }));
                 }
                 else
                 {
-                    foreach (var it in value)
-                    {
-                        bool check = false;
-                        foreach (Control bulletView in _roomView.Controls)
-                        {
-                            if (it.Id.ToString() == bulletView.Name)
-                            {
-                                bulletView.Location = new(it.X, it.Y);
-                                check = true;
-                                break;
-                            }
-                        }
-                        if (!check)
-                        {
-                            BulletView bulletView = new BulletView();
-                            bulletView.Name = it.Id.ToString();
-                            bulletView.Location = new(it.X, it.Y);
-                            _roomView.Controls.Add(bulletView);
-                        }
-                    }
+                    AddBullet(value);
+                    DeleteBullet(value);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
+            }
+        }
+        private void DeleteBullet(List<BulletModel> value)
+        {
+            int i = 0;
+            foreach (Control bulletView in _roomView.Controls)
+            {
+                bool check = false;
+                if (bulletView is BulletView)
+                {
+                    foreach (var it in value)
+                    {
+                        if (it.Id.ToString() == bulletView.Name) {
+                            check = true;
+                            break;
+                        }
+                    }
+                    if (!check) _deleteBullets.Add(i);
+                }
+                i++;
+            }
+            _deleteBullets.Reverse();
+            foreach (var item in _deleteBullets)
+            {
+                _roomView.Controls.RemoveAt(item);
+            }
+            _deleteBullets.Clear();
+        }
+        private void AddBullet(List<BulletModel> value)
+        {
+            foreach (var it in value)
+            {
+                bool check = false;
+                foreach (Control bulletView in _roomView.Controls)
+                {
+                    if (it.Id.ToString() == bulletView.Name)
+                    {
+                        bulletView.Location = new(it.X, it.Y);
+                        check = true;
+                        break;
+                    }
+                }
+                if (!check)
+                {
+                    BulletView bulletView = new BulletView();
+                    bulletView.Name = it.Id.ToString();
+                    bulletView.Location = new(it.X, it.Y);
+                    _roomView.Controls.Add(bulletView);
+                }
             }
         }
     }

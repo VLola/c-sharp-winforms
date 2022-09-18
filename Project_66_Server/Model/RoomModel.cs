@@ -3,9 +3,8 @@ using System.Net.Sockets;
 
 namespace Project_66_Server.Model
 {
-    internal class RoomModel
+    public class RoomModel
     {
-        public object LockBullets { get; set; }
         public int Id { get; set; }
         public int Players { get; set; }
         public bool IsReload { get; set; }

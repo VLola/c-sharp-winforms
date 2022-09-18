@@ -2,10 +2,13 @@
 
 namespace Project_66_Server.Model
 {
-    internal class Client
+    public class Client
     {
         public bool IsLogin { get; set; }
         public bool Login { get; set; }
+        public bool BuyPower { get; set; }
+        public bool BuyDefence { get; set; }
+        public bool IsStart { get; set; }
         public bool IsRegister { get; set; }
         public bool IsDirection { get; set; }
         public bool IsShot { get; set; }

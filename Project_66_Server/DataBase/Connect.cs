@@ -21,6 +21,11 @@ namespace Project_66_Server.DataBase
                     User reg = new User();
                     reg.Name = name;
                     reg.Password = Crypt.Generate(pass);
+                    reg.Power = 0;
+                    reg.Defence = 0;
+                    reg.Coins = 0;
+                    reg.Murders = 0;
+                    reg.Deaths = 0;
                     connection.Insert(reg);
                     return true;
                 }
@@ -41,6 +46,87 @@ namespace Project_66_Server.DataBase
             using (IDbConnection connection = new SqlConnection(connectionStringUser))
             {
                 return connection.Query<User>($"SELECT * FROM Users").ToList();
+            }
+        }
+        public static User GetUser(string name)
+        {
+            using (IDbConnection connection = new SqlConnection(connectionStringUser))
+            {
+                return connection.QuerySingle<User>("SELECT * FROM Users WHERE Name = @Name", new { name });
+            }
+        }
+        public static int GetCoins(string name)
+        {
+            using (IDbConnection connection = new SqlConnection(connectionStringUser))
+            {
+                return connection.QuerySingle<User>("SELECT * FROM Users WHERE Name = @Name", new { name }).Coins;
+            }
+        }
+        public static int GetPower(string name)
+        {
+            using (IDbConnection connection = new SqlConnection(connectionStringUser))
+            {
+                return connection.QuerySingle<User>("SELECT * FROM Users WHERE Name = @Name", new { name }).Power;
+            }
+        }
+        public static int GetDefence(string name)
+        {
+            using (IDbConnection connection = new SqlConnection(connectionStringUser))
+            {
+                return connection.QuerySingle<User>("SELECT * FROM Users WHERE Name = @Name", new { name }).Defence;
+            }
+        }
+        public static void UpdateDeaths(string name, int value)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("Name", name, DbType.String);
+            parameters.Add("Deaths", value, DbType.Int32);
+            using (IDbConnection connection = new SqlConnection(connectionStringUser))
+            {
+                connection.Execute("UPDATE Users SET Deaths = @Deaths WHERE Name = @Name", parameters);
+            }
+        }
+        public static void UpdateMurders(string name, int murders, int coins)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("Name", name, DbType.String);
+            parameters.Add("Murders", murders, DbType.Int32);
+            parameters.Add("Coins", coins, DbType.Int32);
+            using (IDbConnection connection = new SqlConnection(connectionStringUser))
+            {
+                connection.Execute("UPDATE Users SET Murders = @Murders, Coins = @Coins WHERE Name = @Name", parameters);
+            }
+        }
+        public static void UpdateCoins(string name, int value)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("Name", name, DbType.String);
+            parameters.Add("Coins", value, DbType.Int32);
+            using (IDbConnection connection = new SqlConnection(connectionStringUser))
+            {
+                connection.Execute("UPDATE Users SET Coins = @Coins WHERE Name = @Name", parameters);
+            }
+        }
+        public static void UpdateDefence(string name, int defence, int coins)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("Name", name, DbType.String);
+            parameters.Add("Defence", defence, DbType.Int32);
+            parameters.Add("Coins", coins, DbType.Int32);
+            using (IDbConnection connection = new SqlConnection(connectionStringUser))
+            {
+                connection.Execute("UPDATE Users SET Defence = @Defence, Coins = @Coins WHERE Name = @Name", parameters);
+            }
+        }
+        public static void UpdatePower(string name, int power, int coins)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("Name", name, DbType.String);
+            parameters.Add("Power", power, DbType.Int32);
+            parameters.Add("Coins", coins, DbType.Int32);
+            using (IDbConnection connection = new SqlConnection(connectionStringUser))
+            {
+                connection.Execute("UPDATE Users SET Power = @Power, Coins = @Coins WHERE Name = @Name", parameters);
             }
         }
     }

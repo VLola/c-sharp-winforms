@@ -5,7 +5,8 @@
         public RoomView()
         {
             InitializeComponent();
-            Dock = DockStyle.Fill;
+            Size = new(800, 450);
+            BackColor = Color.Black;
         }
     }
 }

@@ -1,10 +1,6 @@
 ﻿using Project_66_Client.Model;
 using Project_66_Client.View;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
 using System.Text.Json;
@@ -15,8 +11,11 @@ namespace Project_66_Client.Controller
     {
         GameView _gameView;
         ClientController _clientController = new();
+        InfoController _infoController;
         RoomController _roomController;
         Socket _socket;
+        List<string> _players = new();
+        List<string> _playersCheck = new();
         public GameController(GameView gameView)
         {
             try
@@ -26,18 +25,56 @@ namespace Project_66_Client.Controller
                 _roomController = new(_gameView.RoomView);
                 _gameView.RoomView.PreviewKeyDown += RoomView_PreviewKeyDown;
                 _gameView.LoginView.Login.Click += Login_Click;
-                Load();
-                Listen();
+                _gameView.ClientView.Start.Click += Start_Click;
+                _gameView.ClientView.Exit.Click += Exit_Click;
+                _gameView.ClientView.BuyPower.Click += BuyPower_Click;
+                _gameView.ClientView.BuyDefence.Click += BuyDefence_Click;
+                _gameView.Disposed += _gameView_Disposed;
+                InfoView infoView = new();
+                _infoController = new(infoView);
+                _gameView.Panel.Controls.Add(infoView);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("3");
+                MessageBox.Show(ex.ToString());
             }
         }
-        private void Connect()
+
+        private void BuyDefence_Click(object? sender, EventArgs e)
+        {
+            _clientController.SetBuyDefence(true);
+            SendClient();
+            _clientController.SetBuyDefence(false);
+        }
+
+        private void BuyPower_Click(object? sender, EventArgs e)
+        {
+            _clientController.SetBuyPower(true);
+            SendClient();
+            _clientController.SetBuyPower(false);
+        }
+
+        private void Exit_Click(object? sender, EventArgs e)
+        {
+            Disconnect();
+        }
+
+        private void _gameView_Disposed(object? sender, EventArgs e)
+        {
+            Disconnect();
+        }
+
+        private void Login_Click(object? sender, EventArgs e)
+        {
+            Login();
+        }
+        private void Login()
         {
             try
             {
+                Load();
+                Listen();
+                Thread.Sleep(1000);
                 _clientController.SetName(_gameView.LoginView.FirstName.Text);
                 _gameView.Invoke(new Action(() => {
                     _gameView.LoginView.FirstName.Text = "";
@@ -46,12 +83,11 @@ namespace Project_66_Client.Controller
                 _gameView.Invoke(new Action(() => {
                     _gameView.LoginView.Password.Text = "";
                 }));
-                _clientController.SetPlayers((int)_gameView.LoginView.Players.SelectedItem);
                 if (_gameView.LoginView.IsRegister.Checked == true)
                 {
                     _clientController.SetIsRegister(true);
                     SendClient();
-                    _clientController.SetIsLogin(false);
+                    _clientController.SetIsRegister(false);
                     _clientController.SetPassword("");
                 }
                 else if (_gameView.LoginView.IsLogin.Checked == true)
@@ -64,16 +100,33 @@ namespace Project_66_Client.Controller
             }
             catch (Exception ex)
             {
-                MessageBox.Show("4");
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void Start_Click(object? sender, EventArgs e)
+        {
+            Start();
+        }
+        private void Start()
+        {
+            try
+            {
+                _clientController.SetPlayers((int)_gameView.ClientView.Players.SelectedItem);
+                _clientController.SetIsStart(true);
+                SendClient();
+                _clientController.SetIsStart(false);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
             }
         }
         private void Disconnect()
         {
-            //ClientModel.IsLoginClient = false;
-            //Close();
-            //Reload();
-            //Load();
-            //Listen();
+            _socket.Shutdown(SocketShutdown.Both);
+            _socket.Close();
+            _gameView.LoginVisible();
         }
         private void Load()
         {
@@ -84,14 +137,9 @@ namespace Project_66_Client.Controller
             }
             catch (Exception ex)
             {
-                MessageBox.Show("5");
+                MessageBox.Show(ex.ToString());
             }
         }
-        private void Login_Click(object? sender, EventArgs e)
-        {
-            Connect();
-        }
-
         private void RoomView_PreviewKeyDown(object? sender, PreviewKeyDownEventArgs e)
         {
             if (e.KeyCode == Keys.Up)
@@ -106,7 +154,7 @@ namespace Project_66_Client.Controller
             }
             else if (e.KeyCode == Keys.Down)
             {
-                if (_clientController.GetLocationY() < _gameView.Height - 50)
+                if (_clientController.GetLocationY() < 400)
                 {
                     _clientController.Down();
                     _clientController.SetIsDirection(true);
@@ -126,7 +174,7 @@ namespace Project_66_Client.Controller
             }
             else if (e.KeyCode == Keys.Right)
             {
-                if (_clientController.GetLocationX() < _gameView.Width - 50)
+                if (_clientController.GetLocationX() < 750)
                 {
                     _clientController.Right();
                     _clientController.SetIsDirection(true);
@@ -139,6 +187,10 @@ namespace Project_66_Client.Controller
                 _clientController.SetIsShot(true);
                 SendClient();
                 _clientController.SetIsShot(false);
+            }
+            else if (e.KeyCode == Keys.Escape)
+            {
+                Disconnect();
             }
         }
         private void SendClient()
@@ -178,23 +230,16 @@ namespace Project_66_Client.Controller
                         }
                         else
                         {
-                            Client? client = JsonSerializer.Deserialize<Client>(builder.ToString());
+                            ClientModel? client = JsonSerializer.Deserialize<ClientModel>(builder.ToString());
                             if (client != null)
                             {
                                 if (client.IsLogin)
                                 {
                                     if (client.Login)
                                     {
-                                        _gameView.LoginHidden();
-                                        foreach (var item in client.Tanks)
-                                        {
-                                            if(item.Name == _clientController.GetName())
-                                            {
-                                                _clientController.SetDirection(item.Direction);
-                                                _clientController.SetLocationX(item.X);
-                                                _clientController.SetLocationY(item.Y);
-                                            }
-                                        }
+                                        _gameView.ClientVisible();
+                                        _gameView.ClientView.ClientName.Text = _clientController.GetName();
+                                        _infoController.SetInfo(client.Tank);
                                     }
                                     else MessageBox.Show("Login error!");
                                 }
@@ -202,30 +247,55 @@ namespace Project_66_Client.Controller
                                 {
                                     if (client.Login)
                                     {
-                                        _gameView.LoginHidden(); 
-                                        foreach (var item in client.Tanks)
-                                        {
-                                            if (item.Name == _clientController.GetName())
-                                            {
-                                                _clientController.SetDirection(item.Direction);
-                                                _clientController.SetLocationX(item.X);
-                                                _clientController.SetLocationY(item.Y);
-                                            }
-                                        }
+                                        _gameView.ClientVisible();
+                                        _gameView.ClientView.ClientName.Text = _clientController.GetName();
+                                        _infoController.SetInfo(client.Tank);
                                     }
                                     else MessageBox.Show("Register error!");
                                 }
+                                else if (client.IsStart)
+                                {
+                                    _gameView.GameVisible();
+                                }
+                                else if(client.BuyDefence || client.BuyPower)
+                                {
+                                    _infoController.SetInfo(client.Tank);
+                                }
                                 Task.Run(() =>
                                 {
+                                    _players.Clear();
+                                    foreach (var item in client.Tanks)
+                                    {
+                                        _players.Add(item.Name);
+                                        if (item.Name == _clientController.GetName())
+                                        {
+                                            _clientController.SetTank(item);
+                                            _infoController.SetInfo(item);
+                                        }
+                                    }
+                                    if(_playersCheck.Count != _players.Count)
+                                    {
+                                        _gameView.Players.Items.Clear();
+                                        _gameView.Players.Items.AddRange(_players.ToArray());
+                                        _playersCheck.Clear();
+                                        foreach (var item in _players)
+                                        {
+                                            _playersCheck.Add(item);
+                                        }
+                                    }
                                     _roomController.LoadTanks(client.Tanks);
                                     _roomController.LoadBullets(client.Bullets);
                                 });
                             }
                         }
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        MessageBox.Show(ex.ToString());
+                        if(_socket != null)
+                        {
+                            _socket.Shutdown(SocketShutdown.Both);
+                            _socket.Close();
+                        }
                     }
                 }
             });

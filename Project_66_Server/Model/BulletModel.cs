@@ -2,7 +2,7 @@
 
 namespace Project_66_Server.Model
 {
-    internal class BulletModel: TankModel
+    public class BulletModel: TankModel
     {
     }
 }
