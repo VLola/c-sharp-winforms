@@ -1,20 +1,24 @@
-﻿namespace Project_66_Client.View
+﻿using Project_66_Client.Controller;
+
+namespace Project_66_Client.View
 {
     public partial class GameView : UserControl
     {
-        public Panel Panel = new();
-        public Panel PanelPlayers = new();
-        public ListBox Players = new();
-        public LoginView LoginView = new();
-        public RoomView RoomView = new();
-        public ClientView ClientView = new();
+        GameController _gameController;
+        Panel Panel = new();
+        Panel PanelPlayers = new();
+        ListBox Players = new();
+        LoginView _loginView;
+        RoomView _roomView;
+        ClientView _clientView;
         public GameView()
         {
             InitializeComponent();
             Dock = DockStyle.Fill;
-            Controls.Add(RoomView);
-            Controls.Add(ClientView);
-            Controls.Add(LoginView);
+            _loginView = new();
+            _clientView = new();
+            Controls.Add(_clientView);
+            Controls.Add(_loginView);
 
             PanelPlayers.Location = new(5, 175);
             PanelPlayers.Size = new(80, 150);
@@ -36,7 +40,17 @@
             Panel.Controls.Add(PanelPlayers);
             Controls.Add(Panel);
         }
-
+        public void SetController(GameController gameController)
+        {
+            _gameController = gameController;
+            _roomView.PreviewKeyDown += _gameController.RoomView_PreviewKeyDown;
+            _loginView.Login.Click += _gameController.Login_Click;
+            _clientView.Start.Click += _gameController.Start_Click;
+            _clientView.Exit.Click += _gameController.Exit_Click;
+            _clientView.BuyPower.Click += _gameController.BuyPower_Click;
+            _clientView.BuyDefence.Click += _gameController.BuyDefence_Click;
+            Disposed += _gameController._gameView_Disposed;
+        }
         public void LoginVisible()
         {
             try
@@ -45,20 +59,20 @@
                 {
                     Invoke(new Action(() =>
                     {
-                        RoomView.Visible = false;
-                        ClientView.Visible = false;
+                        _roomView.Visible = false;
+                        _clientView.Visible = false;
                         Panel.Visible = false;
                         PanelPlayers.Visible = false;
-                        LoginView.Visible = true;
+                        _loginView.Visible = true;
                     }));
                 }
                 else
                 {
-                    RoomView.Visible = false;
-                    ClientView.Visible = false;
+                    _roomView.Visible = false;
+                    _clientView.Visible = false;
                     Panel.Visible = false;
                     PanelPlayers.Visible = false;
-                    LoginView.Visible = true;
+                    _loginView.Visible = true;
                 }
             }
             catch (Exception ex)
@@ -74,20 +88,20 @@
                 {
                     Invoke(new Action(() =>
                     {
-                        LoginView.Visible = false;
-                        ClientView.Visible = false;
+                        _loginView.Visible = false;
+                        _clientView.Visible = false;
                         Panel.Visible = true;
                         PanelPlayers.Visible = true;
-                        RoomView.Visible = true;
+                        _roomView.Visible = true;
                     }));
                 }
                 else
                 {
-                    LoginView.Visible = false;
-                    ClientView.Visible = false;
+                    _loginView.Visible = false;
+                    _clientView.Visible = false;
                     Panel.Visible = true;
                     PanelPlayers.Visible = true;
-                    RoomView.Visible = true;
+                    _roomView.Visible = true;
                 }
             }
             catch (Exception ex)
@@ -103,26 +117,118 @@
                 {
                     Invoke(new Action(() =>
                     {
-                        LoginView.Visible = false;
-                        RoomView.Visible = false;
+                        _loginView.Visible = false;
+                        _roomView.Visible = false;
                         PanelPlayers.Visible = false;
                         Panel.Visible = true;
-                        ClientView.Visible = true;
+                        _clientView.Visible = true;
                     }));
                 }
                 else
                 {
-                    LoginView.Visible = false;
-                    RoomView.Visible = false;
+                    _loginView.Visible = false;
+                    _roomView.Visible = false;
                     PanelPlayers.Visible = false;
                     Panel.Visible = true;
-                    ClientView.Visible = true;
+                    _clientView.Visible = true;
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
+        }
+        public RoomView AddRoomView()
+        {
+            _roomView = new();
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    Controls.Add(_roomView);
+                }));
+            }
+            else
+            {
+                Controls.Add(_roomView);
+            }
+            return _roomView;
+        }
+        public InfoView AddInfoView()
+        {
+            InfoView infoView = new();
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    Panel.Controls.Add(infoView);
+                }));
+            }
+            else
+            {
+                Panel.Controls.Add(infoView);
+            }
+            return infoView;
+        }
+        public void PlayersClear()
+        {
+            Players.Items.Clear();
+        }
+        public void PlayersAdd(string[] arr)
+        {
+            Players.Items.AddRange(arr);
+        }
+        public int GetPlayers()
+        {
+            return (int)_clientView.Players.SelectedItem;
+        }
+        public string GetFirstName()
+        {
+            return _loginView.FirstName.Text;
+        }
+        public string GetPassword()
+        {
+            return _loginView.Password.Text;
+        }
+        public void ResetFirstName()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    _loginView.FirstName.Text = "";
+                }));
+            }
+            else
+            {
+                _loginView.FirstName.Text = "";
+            }
+        }
+        public void ResetPassword()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    _loginView.Password.Text = "";
+                }));
+            }
+            else
+            {
+                _loginView.Password.Text = "";
+            }
+        }
+        public bool GetCheckedRegister()
+        {
+            return _loginView.IsRegister.Checked;
+        }
+        public bool GetCheckedLogin()
+        {
+            return _loginView.IsLogin.Checked;
+        }
+        public void SetClientName(string name)
+        {
+            _clientView.ClientName.Text = name;
         }
     }
 }

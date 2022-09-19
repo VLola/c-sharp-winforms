@@ -5,13 +5,12 @@ namespace Project_66_Client
 {
     public partial class Form1 : Form
     {
-        GameView _gameView;
-        GameController _gameController;
         public Form1()
         {
             InitializeComponent();
+            GameView _gameView;
             _gameView = new GameView();
-            _gameController = new GameController(_gameView);
+            new GameController(_gameView);
             Controls.Add(_gameView);
         }
     }

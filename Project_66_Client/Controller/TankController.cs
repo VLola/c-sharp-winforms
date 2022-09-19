@@ -20,124 +20,57 @@ namespace Project_66_Client.Controller
             _tankView = tankView;
             HealthView healthView = new();
             _healthController = new(healthView);
-            _tankView.Controls.Add(healthView);
-            try
-            {
-                if (_roomView.InvokeRequired)
-                {
-                    _roomView.Invoke(new Action(() =>
-                    {
-                        _roomView.Controls.Add(_tankView);
-                    }));
-                }
-                else
-                {
-                    _roomView.Controls.Add(_tankView);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-
+            _tankView.AddHealth(healthView);
+            _roomView.AddTank(_tankView);
             Load(tankModel);
         }
         public void DisposeTank()
         {
-            try
-            {
-                if (_roomView.InvokeRequired)
-                {
-                    _roomView.Invoke(new Action(() =>
-                    {
-                        _roomView.Controls.Remove(_tankView);
-                    }));
-                }
-                else
-                {
-                    _roomView.Controls.Remove(_tankView);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
+            _roomView.RemoveTank(_tankView);
         }
         public void Load(TankModel tankModel)
         {
-            try
+            if (tankModel.Direction == "Down" && _direction != "Down") _tankView.Down();
+            else if (tankModel.Direction == "Up" && _direction != "Up") _tankView.Up();
+            else if (tankModel.Direction == "Right" && _direction != "Right") _tankView.IsRight();
+            else if (tankModel.Direction == "Left" && _direction != "Left") _tankView.IsLeft();
+            if (tankModel.Killed && !_killed)
             {
-                if (_tankView.InvokeRequired)
-                {
-                    _tankView.Invoke(new Action(() =>
-                    {
-                        if (tankModel.Direction == "Down" && _direction != "Down") _tankView.Down();
-                        else if (tankModel.Direction == "Up" && _direction != "Up") _tankView.Up();
-                        else if (tankModel.Direction == "Right" && _direction != "Right") _tankView.IsRight();
-                        else if (tankModel.Direction == "Left" && _direction != "Left") _tankView.IsLeft();
-                        if (tankModel.Killed && !_killed)
-                        {
-                            _killed = true;
-                            _tankView.Death();
-                        }
-                        else if (!tankModel.Killed && _killed)
-                        {
-                            _killed = false;
-                            _tankView.Life();
-                        }
-                        if(tankModel.Health != _health)
-                        {
-                            _health = tankModel.Health;
-                            _healthController.Load(_health);
-                        }
-                        if (tankModel.Power > 15 && _power != tankModel.Power)
-                        {
-                            _power = tankModel.Power;
-                            _tankView.BackColor = Color.Yellow;
-                        }
-                        else if (tankModel.Power > 10 && _power != tankModel.Power)
-                        {
-                            _power = tankModel.Power;
-                            _tankView.BackColor = Color.Orange;
-                        }
-                        else if (tankModel.Power > 5 && _power != tankModel.Power)
-                        {
-                            _power = tankModel.Power;
-                            _tankView.BackColor = Color.LightGreen;
-                        }
-                        _direction = tankModel.Direction;
-                        _tankView.Location = new(tankModel.X, tankModel.Y);
-                    }));
-                }
-                else
-                {
-                    if (tankModel.Direction == "Down" && _direction != "Down") _tankView.Down();
-                    else if (tankModel.Direction == "Up" && _direction != "Up") _tankView.Up();
-                    else if (tankModel.Direction == "Right" && _direction != "Right") _tankView.IsRight();
-                    else if (tankModel.Direction == "Left" && _direction != "Left") _tankView.IsLeft();
-                    if (tankModel.Killed && !_killed)
-                    {
-                        _killed = true;
-                        _tankView.Death();
-                    }
-                    else if (!tankModel.Killed && _killed)
-                    {
-                        _killed = false;
-                        _tankView.Life();
-                    }
-                    if (tankModel.Health != _health)
-                    {
-                        _health = tankModel.Health;
-                        _healthController.Load(_health);
-                    }
-                    _direction = tankModel.Direction;
-                    _tankView.Location = new(tankModel.X, tankModel.Y);
-                }
+                _killed = true;
+                _tankView.Death();
             }
-            catch (Exception ex)
+            else if (!tankModel.Killed && _killed)
             {
-                MessageBox.Show(ex.ToString());
+                _killed = false;
+                _power = -1;
             }
+            if (tankModel.Health != _health)
+            {
+                _health = tankModel.Health;
+                _healthController.Load(_health);
+            }
+            if (tankModel.Power > 15 && _power != tankModel.Power)
+            {
+                _power = tankModel.Power;
+                _tankView.SetColor(Color.Yellow);
+            }
+            else if (tankModel.Power > 10 && _power != tankModel.Power)
+            {
+                _power = tankModel.Power;
+                _tankView.SetColor(Color.Orange);
+            }
+            else if (tankModel.Power > 5 && _power != tankModel.Power)
+            {
+                _power = tankModel.Power;
+                _tankView.SetColor(Color.LightGreen);
+            }
+            else if(tankModel.Power >= 0 && _power != tankModel.Power)
+            {
+                _power = tankModel.Power;
+                _tankView.SetColor(Color.Green);
+            }
+            _direction = tankModel.Direction;
+            _tankView.SetLocation(tankModel.X, tankModel.Y);
         }
     }
 }

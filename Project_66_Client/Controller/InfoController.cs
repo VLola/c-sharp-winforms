@@ -13,71 +13,30 @@ namespace Project_66_Client.Controller
         }
         public void SetInfo(TankModel tankModel)
         {
-            try
+            if (_infoModel.Power != tankModel.Power)
             {
-                if (_infoView.InvokeRequired)
-                {
-                    _infoView.Invoke(new Action(() =>
-                    {
-                        if (_infoModel.Power != tankModel.Power)
-                        {
-                            _infoModel.Power = tankModel.Power;
-                            _infoView.Power.Text = _infoModel.Power.ToString();
-                        }
-                        if (_infoModel.Defence != tankModel.Defence)
-                        {
-                            _infoModel.Defence = tankModel.Defence;
-                            _infoView.Defence.Text = _infoModel.Defence.ToString();
-                        }
-                        if (_infoModel.Coins != tankModel.Coins)
-                        {
-                            _infoModel.Coins = tankModel.Coins;
-                            _infoView.Coins.Text = _infoModel.Coins.ToString();
-                        }
-                        if (_infoModel.Murders != tankModel.Murders)
-                        {
-                            _infoModel.Murders = tankModel.Murders;
-                            _infoView.Murders.Text = _infoModel.Murders.ToString();
-                        }
-                        if (_infoModel.Deaths != tankModel.Deaths)
-                        {
-                            _infoModel.Deaths = tankModel.Deaths;
-                            _infoView.Deaths.Text = _infoModel.Deaths.ToString();
-                        }
-                    }));
-                }
-                else
-                {
-                    if (_infoModel.Power != tankModel.Power)
-                    {
-                        _infoModel.Power = tankModel.Power;
-                        _infoView.Power.Text = _infoModel.Power.ToString();
-                    }
-                    if (_infoModel.Defence != tankModel.Defence)
-                    {
-                        _infoModel.Defence = tankModel.Defence;
-                        _infoView.Defence.Text = _infoModel.Defence.ToString();
-                    }
-                    if (_infoModel.Coins != tankModel.Coins)
-                    {
-                        _infoModel.Coins = tankModel.Coins;
-                        _infoView.Coins.Text = _infoModel.Coins.ToString();
-                    }
-                    if (_infoModel.Murders != tankModel.Murders)
-                    {
-                        _infoModel.Murders = tankModel.Murders;
-                        _infoView.Murders.Text = _infoModel.Murders.ToString();
-                    }
-                    if (_infoModel.Deaths != tankModel.Deaths)
-                    {
-                        _infoModel.Deaths = tankModel.Deaths;
-                        _infoView.Deaths.Text = _infoModel.Deaths.ToString();
-                    }
-                }
+                _infoModel.Power = tankModel.Power;
+                _infoView.SetPower(_infoModel.Power.ToString());
             }
-            catch (Exception ex)
+            if (_infoModel.Defence != tankModel.Defence)
             {
-                MessageBox.Show(ex.ToString());
+                _infoModel.Defence = tankModel.Defence;
+                _infoView.SetDefence(_infoModel.Defence.ToString());
+            }
+            if (_infoModel.Coins != tankModel.Coins)
+            {
+                _infoModel.Coins = tankModel.Coins;
+                _infoView.SetCoins(_infoModel.Coins.ToString());
+            }
+            if (_infoModel.Murders != tankModel.Murders)
+            {
+                _infoModel.Murders = tankModel.Murders;
+                _infoView.SetMurders(_infoModel.Murders.ToString());
+            }
+            if (_infoModel.Deaths != tankModel.Deaths)
+            {
+                _infoModel.Deaths = tankModel.Deaths;
+                _infoView.SetDeaths(_infoModel.Deaths.ToString());
             }
         }
     }

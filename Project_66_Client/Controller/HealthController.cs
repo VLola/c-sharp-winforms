@@ -12,24 +12,7 @@ namespace Project_66_Client.Controller
 
         public void Load(int health)
         {
-            try
-            {
-                if (_healthView.InvokeRequired)
-                {
-                    _healthView.Invoke(new Action(() =>
-                    {
-                        _healthView.Size = new Size((health * 2), 2);
-                    }));
-                }
-                else
-                {
-                    _healthView.Size = new Size((health * 2), 2);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
+            _healthView.Load(health);
         }
     }
 }

@@ -13,5 +13,19 @@ namespace Project_66_Client.View
             Enabled = false;
             BackColor = Color.Red;
         }
+        public void Load(int health)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    Size = new Size((health * 2), 2);
+                }));
+            }
+            else
+            {
+                Size = new Size((health * 2), 2);
+            }
+        }
     }
 }

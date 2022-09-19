@@ -1,12 +1,14 @@
-﻿namespace Project_66_Client.View
+﻿using Project_66_Client.Model;
+
+namespace Project_66_Client.View
 {
     public partial class InfoView : UserControl
     {
-        public Label Power = new();
-        public Label Defence = new();
-        public Label Coins = new();
-        public Label Murders = new();
-        public Label Deaths = new();
+        Label Power = new();
+        Label Defence = new();
+        Label Coins = new();
+        Label Murders = new();
+        Label Deaths = new();
         public InfoView()
         {
             InitializeComponent();
@@ -59,6 +61,61 @@
             Controls.Add(Coins);
             Controls.Add(Murders);
             Controls.Add(Deaths);
+        }
+        public void SetPower(string value)
+        {
+            if (InvokeRequired)
+            {
+                Power.Text = value;
+            }
+            else
+            {
+                Power.Text = value;
+            }
+        }
+        public void SetDefence(string value)
+        {
+            if (InvokeRequired)
+            {
+                Defence.Text = value;
+            }
+            else
+            {
+                Defence.Text = value;
+            }
+        }
+        public void SetCoins(string value)
+        {
+            if (InvokeRequired)
+            {
+                Coins.Text = value;
+            }
+            else
+            {
+                Coins.Text = value;
+            }
+        }
+        public void SetMurders(string value)
+        {
+            if (InvokeRequired)
+            {
+                Murders.Text = value;
+            }
+            else
+            {
+                Murders.Text = value;
+            }
+        }
+        public void SetDeaths(string value)
+        {
+            if (InvokeRequired)
+            {
+                Deaths.Text = value;
+            }
+            else
+            {
+                Deaths.Text = value;
+            }
         }
     }
 }
