@@ -7,9 +7,9 @@ namespace Project_66_Server.View
 {
     public partial class GameView : UserControl
     {
-        public ListBox Games { get; set; }
-        public ListBox Users { get; set; }
-        public ListBox User { get; set; }
+        ListBox Games { get; set; }
+        ListBox Users { get; set; }
+        ListBox User { get; set; }
         public GameView()
         {
             InitializeComponent();
@@ -52,6 +52,12 @@ namespace Project_66_Server.View
             RoomModel roomModel = (RoomModel)list.SelectedItem;
             Users.Items.Clear();
             Users.Items.AddRange(roomModel.Tanks.ToArray());
+        }
+        public void AddRoom(RoomModel roomModel)
+        {
+            Invoke(new Action(() => {
+                Games.Items.Add(roomModel);
+            }));
         }
 
     }

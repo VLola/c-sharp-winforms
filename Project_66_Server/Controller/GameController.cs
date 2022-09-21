@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Sockets;
-using System.Windows.Forms;
 
 namespace Project_66_Server.Controller
 {
@@ -17,6 +16,7 @@ namespace Project_66_Server.Controller
         int _bulletId = 1;
         int _room = 1;
         GameView _gameView;
+        List<RoomModel> _rooms = new List<RoomModel>();
         public GameController(GameView gameView) {
             _gameView = gameView;
             Listen();
@@ -156,6 +156,7 @@ namespace Project_66_Server.Controller
                                         BulletModel bulletModel = new BulletModel();
                                         bulletModel.Id = _bulletId++;
                                         bulletModel.Name = client.Tank.Name;
+                                        bulletModel.Power = client.Tank.Power;
                                         bulletModel.Direction = client.Tank.Direction;
                                         if (bulletModel.Direction == "Right")
                                         {
@@ -220,7 +221,7 @@ namespace Project_66_Server.Controller
         }
         private RoomModel GetRoom(int players)
         {
-            foreach (RoomModel item in _gameView.Games.Items)
+            lock (_rooms) foreach (RoomModel item in _rooms)
             {
                 if (item.Players == players && item.Tanks.Count < players) return item;
             }
@@ -232,9 +233,8 @@ namespace Project_66_Server.Controller
             roomModel.Bullets = new List<BulletModel>();
             RunBullets(roomModel);
             SendRoom(roomModel);
-            _gameView.Invoke(new Action(() => {
-                _gameView.Games.Items.Add(roomModel);
-            }));
+            lock(_rooms)_rooms.Add(roomModel);
+            _gameView.AddRoom(roomModel);
             return roomModel;
         }
         private RoomModel AddedTank(Client client, Socket clientSocket)
@@ -352,16 +352,7 @@ namespace Project_66_Server.Controller
                                     if (!it.Killed && bullet.Y > it.Y && bullet.X > it.X && bullet.Y < it.Y + 50 && bullet.X < it.X + 50) {
                                         if(!removeBullets.Contains(i)) removeBullets.Add(i);
                                         lock (roomModel.Tanks) {
-                                            int power = 0;
-                                            foreach (var tank in roomModel.Tanks)
-                                            {
-                                                if (tank.Name == bullet.Name)
-                                                {
-                                                    power = tank.Power;
-                                                    break;
-                                                }
-                                            }
-                                            int damage = it.Defence - 1 - power;
+                                            int damage = it.Defence - 1 - bullet.Power;
                                             if(damage < 0)
                                             {
                                                 it.Health += damage;
