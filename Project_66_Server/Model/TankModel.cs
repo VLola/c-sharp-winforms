@@ -7,10 +7,6 @@
         public int Coins { get; set; }
         public int Murders { get; set; }
         public int Deaths { get; set; }
-        public bool Killed { get; set; } 
-        public override string ToString()
-        {
-            return Name;
-        }
+        public bool Killed { get; set; }
     }
 }

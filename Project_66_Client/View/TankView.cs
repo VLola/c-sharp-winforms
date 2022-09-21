@@ -28,20 +28,6 @@ namespace Project_66_Client.View
                 BackColor = Color.Gray;
             }
         }
-        //public void Life()
-        //{
-        //    if (InvokeRequired)
-        //    {
-        //        Invoke(new Action(() =>
-        //        {
-        //            BackColor = Color.ForestGreen;
-        //        }));
-        //    }
-        //    else
-        //    {
-        //        BackColor = Color.ForestGreen;
-        //    }
-        //}
         public void Up()
         {
             if (InvokeRequired)

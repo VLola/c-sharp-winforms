@@ -126,20 +126,7 @@ namespace Project_66_Server.Controller
                             }
                             else if (client.IsDirection)
                             {
-                                lock (roomModel.Tanks)
-                                {
-                                    int i = 0;
-                                    foreach (var item in roomModel.Tanks)
-                                    {
-                                        if (item.Name == client.Tank.Name) break;
-                                        i++;
-                                    }
-                                    if (!roomModel.Tanks[i].Killed)
-                                    {
-                                        roomModel.Tanks[i] = client.Tank;
-                                        roomModel.IsReload = true;
-                                    }
-                                }
+                                Run(roomModel, client);
                             }
                             else if (client.IsShot)
                             {
@@ -219,6 +206,41 @@ namespace Project_66_Server.Controller
                 }
             });
         }
+        private async void Run(RoomModel roomModel, Client client)
+        {
+            await Task.Run(()=>{
+
+                lock (roomModel.Tanks)
+                {
+                    int i = 0;
+                    foreach (var item in roomModel.Tanks)
+                    {
+                        if (item.Name == client.Tank.Name) break;
+                        i++;
+                    }
+                    if (!roomModel.Tanks[i].Killed)
+                    {
+                        lock (roomModel.Bricks)
+                        {
+                            bool run = true;
+                            foreach (var it in roomModel.Bricks)
+                            {
+                                if (client.Tank.Y > it.Y && client.Tank.X > it.X && client.Tank.Y < it.Y + 25 && client.Tank.X < it.X + 25)
+                                {
+                                    run = false;
+                                    break;
+                                }
+                            }
+                            if (run)
+                            {
+                                roomModel.Tanks[i] = client.Tank;
+                                roomModel.IsReload = true;
+                            }
+                        }
+                    }
+                }
+            });
+        }
         private RoomModel GetRoom(int players)
         {
             lock (_rooms) foreach (RoomModel item in _rooms)
@@ -231,6 +253,7 @@ namespace Project_66_Server.Controller
             roomModel.Sockets = new List<Socket>();
             roomModel.Tanks = new List<TankModel>();
             roomModel.Bullets = new List<BulletModel>();
+            roomModel.Bricks = GetBricks();
             RunBullets(roomModel);
             SendRoom(roomModel);
             lock(_rooms)_rooms.Add(roomModel);
@@ -258,13 +281,13 @@ namespace Project_66_Server.Controller
                 }
                 else if (client.Tank.Id == 3)
                 {
-                    client.Tank.X = 600;
+                    client.Tank.X = 650;
                     client.Tank.Y = 0;
                     client.Tank.Direction = "Down";
                 }
                 else if (client.Tank.Id == 4)
                 {
-                    client.Tank.X = 600;
+                    client.Tank.X = 650;
                     client.Tank.Y = 400;
                     client.Tank.Direction = "Up";
                 }
@@ -312,13 +335,13 @@ namespace Project_66_Server.Controller
                             }
                             else if (item.Id == 3)
                             {
-                                item.X = 600;
+                                item.X = 650;
                                 item.Y = 0;
                                 item.Direction = "Down";
                             }
                             else if (item.Id == 4)
                             {
-                                item.X = 600;
+                                item.X = 650;
                                 item.Y = 400;
                                 item.Direction = "Up";
                             }
@@ -412,6 +435,7 @@ namespace Project_66_Server.Controller
                                     Task.Delay(10);
                                     client.Tanks = roomModel.Tanks;
                                     client.Bullets = roomModel.Bullets;
+                                    client.Bricks = roomModel.Bricks;
                                     item.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
                                     roomModel.IsReload = false;
                                 }
@@ -422,6 +446,255 @@ namespace Project_66_Server.Controller
                     catch { }
                 }
             });
+        }
+
+        private List<BrickModel> GetBricks()
+        {
+            List<BrickModel> list = new List<BrickModel>();
+            int id = 1;
+            // -----------------------------------------------------------
+            list.Add(new BrickModel() { Id = id++, X = 50, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 50, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 50, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 50, Y = 125 });
+            list.Add(new BrickModel() { Id = id++, X = 75, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 75, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 75, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 75, Y = 125 });
+
+            list.Add(new BrickModel() { Id = id++, X = 50, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 50, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 50, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 50, Y = 375 });
+            list.Add(new BrickModel() { Id = id++, X = 75, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 75, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 75, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 75, Y = 375 });
+            // -----------------------------------------------------------
+            list.Add(new BrickModel() { Id = id++, X = 150, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 150, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 150, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 150, Y = 125 });
+            list.Add(new BrickModel() { Id = id++, X = 175, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 175, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 175, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 175, Y = 125 });
+
+            list.Add(new BrickModel() { Id = id++, X = 150, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 150, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 150, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 150, Y = 375 });
+            list.Add(new BrickModel() { Id = id++, X = 175, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 175, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 175, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 175, Y = 375 });
+            // -----------------------------------------------------------
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 125 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 125 });
+
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 375 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 375 });
+            // -----------------------------------------------------------
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 125 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 125 });
+
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 250, Y = 375 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 275, Y = 375 });
+            // -----------------------------------------------------------
+            list.Add(new BrickModel() { Id = id++, X = 350, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 350, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 350, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 350, Y = 125 });
+            list.Add(new BrickModel() { Id = id++, X = 375, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 375, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 375, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 375, Y = 125 });
+
+            list.Add(new BrickModel() { Id = id++, X = 350, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 350, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 350, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 350, Y = 375 });
+            list.Add(new BrickModel() { Id = id++, X = 375, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 375, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 375, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 375, Y = 375 });
+            // -----------------------------------------------------------
+            list.Add(new BrickModel() { Id = id++, X = 400, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 400, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 400, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 400, Y = 125 });
+            list.Add(new BrickModel() { Id = id++, X = 425, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 425, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 425, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 425, Y = 125 });
+
+            list.Add(new BrickModel() { Id = id++, X = 400, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 400, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 400, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 400, Y = 375 });
+            list.Add(new BrickModel() { Id = id++, X = 425, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 425, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 425, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 425, Y = 375 });
+            // -----------------------------------------------------------
+            list.Add(new BrickModel() { Id = id++, X = 500, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 500, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 500, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 500, Y = 125 });
+            list.Add(new BrickModel() { Id = id++, X = 525, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 525, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 525, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 525, Y = 125 });
+
+            list.Add(new BrickModel() { Id = id++, X = 500, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 500, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 500, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 500, Y = 375 });
+            list.Add(new BrickModel() { Id = id++, X = 525, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 525, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 525, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 525, Y = 375 });
+            // -----------------------------------------------------------
+            list.Add(new BrickModel() { Id = id++, X = 600, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 600, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 600, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 600, Y = 125 });
+            list.Add(new BrickModel() { Id = id++, X = 625, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 625, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 625, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 625, Y = 125 });
+
+            list.Add(new BrickModel() { Id = id++, X = 600, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 600, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 600, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 600, Y = 375 });
+            list.Add(new BrickModel() { Id = id++, X = 625, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 625, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 625, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 625, Y = 375 });
+            // -----------------------------------------------------------
+            list.Add(new BrickModel() { Id = id++, X = 700, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 700, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 700, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 700, Y = 125 });
+            list.Add(new BrickModel() { Id = id++, X = 725, Y = 50 });
+            list.Add(new BrickModel() { Id = id++, X = 725, Y = 75 });
+            list.Add(new BrickModel() { Id = id++, X = 725, Y = 100 });
+            list.Add(new BrickModel() { Id = id++, X = 725, Y = 125 });
+
+            list.Add(new BrickModel() { Id = id++, X = 700, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 700, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 700, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 700, Y = 375 });
+            list.Add(new BrickModel() { Id = id++, X = 725, Y = 300 });
+            list.Add(new BrickModel() { Id = id++, X = 725, Y = 325 });
+            list.Add(new BrickModel() { Id = id++, X = 725, Y = 350 });
+            list.Add(new BrickModel() { Id = id++, X = 725, Y = 375 });
+            // -----------------------------------------------------------
+            list.Add(new BrickModel() { Id = id++, X = 0, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 0, Y = 225 });
+            list.Add(new BrickModel() { Id = id++, X = 25, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 25, Y = 225 });
+
+            list.Add(new BrickModel() { Id = id++, X = 100, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 100, Y = 225 });
+            list.Add(new BrickModel() { Id = id++, X = 125, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 125, Y = 225 });
+
+            list.Add(new BrickModel() { Id = id++, X = 200, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 200, Y = 225 });
+            list.Add(new BrickModel() { Id = id++, X = 225, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 225, Y = 225 });
+
+            list.Add(new BrickModel() { Id = id++, X = 300, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 300, Y = 225 });
+            list.Add(new BrickModel() { Id = id++, X = 325, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 325, Y = 225 });
+
+            list.Add(new BrickModel() { Id = id++, X = 450, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 450, Y = 225 });
+            list.Add(new BrickModel() { Id = id++, X = 475, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 475, Y = 225 });
+
+            list.Add(new BrickModel() { Id = id++, X = 550, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 550, Y = 225 });
+            list.Add(new BrickModel() { Id = id++, X = 575, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 575, Y = 225 });
+
+            list.Add(new BrickModel() { Id = id++, X = 650, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 650, Y = 225 });
+            list.Add(new BrickModel() { Id = id++, X = 675, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 675, Y = 225 });
+
+            list.Add(new BrickModel() { Id = id++, X = 750, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 750, Y = 225 });
+            list.Add(new BrickModel() { Id = id++, X = 775, Y = 200 });
+            list.Add(new BrickModel() { Id = id++, X = 775, Y = 225 });
+            // -----------------------------------------------------------
+            list.Add(new BrickModel() { Id = id++, X = 200, Y = 0 });
+            list.Add(new BrickModel() { Id = id++, X = 200, Y = 25 });
+            list.Add(new BrickModel() { Id = id++, X = 225, Y = 0 });
+            list.Add(new BrickModel() { Id = id++, X = 225, Y = 25 });
+
+            list.Add(new BrickModel() { Id = id++, X = 300, Y = 0 });
+            list.Add(new BrickModel() { Id = id++, X = 300, Y = 25 });
+            list.Add(new BrickModel() { Id = id++, X = 325, Y = 0 });
+            list.Add(new BrickModel() { Id = id++, X = 325, Y = 25 });
+
+            list.Add(new BrickModel() { Id = id++, X = 450, Y = 0 });
+            list.Add(new BrickModel() { Id = id++, X = 450, Y = 25 });
+            list.Add(new BrickModel() { Id = id++, X = 475, Y = 0 });
+            list.Add(new BrickModel() { Id = id++, X = 475, Y = 25 });
+
+            list.Add(new BrickModel() { Id = id++, X = 550, Y = 0 });
+            list.Add(new BrickModel() { Id = id++, X = 550, Y = 25 });
+            list.Add(new BrickModel() { Id = id++, X = 575, Y = 0 });
+            list.Add(new BrickModel() { Id = id++, X = 575, Y = 25 });
+            // -----------------------------------------------------------
+            list.Add(new BrickModel() { Id = id++, X = 200, Y = 400 });
+            list.Add(new BrickModel() { Id = id++, X = 200, Y = 425 });
+            list.Add(new BrickModel() { Id = id++, X = 225, Y = 400 });
+            list.Add(new BrickModel() { Id = id++, X = 225, Y = 425 });
+
+            list.Add(new BrickModel() { Id = id++, X = 300, Y = 400 });
+            list.Add(new BrickModel() { Id = id++, X = 300, Y = 425 });
+            list.Add(new BrickModel() { Id = id++, X = 325, Y = 400 });
+            list.Add(new BrickModel() { Id = id++, X = 325, Y = 425 });
+
+            list.Add(new BrickModel() { Id = id++, X = 450, Y = 400 });
+            list.Add(new BrickModel() { Id = id++, X = 450, Y = 425 });
+            list.Add(new BrickModel() { Id = id++, X = 475, Y = 400 });
+            list.Add(new BrickModel() { Id = id++, X = 475, Y = 425 });
+
+            list.Add(new BrickModel() { Id = id++, X = 550, Y = 400 });
+            list.Add(new BrickModel() { Id = id++, X = 550, Y = 425 });
+            list.Add(new BrickModel() { Id = id++, X = 575, Y = 400 });
+            list.Add(new BrickModel() { Id = id++, X = 575, Y = 425 });
+            return list;
         }
     }
 }

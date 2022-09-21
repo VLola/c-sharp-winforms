@@ -11,6 +11,7 @@ namespace Project_66_Server.Model
         public List<Socket> Sockets { get; set; }
         public List<TankModel> Tanks { get; set; }
         public List<BulletModel> Bullets { get; set; }
+        public List<BrickModel> Bricks { get; set; }
         public override string ToString()
         {
             return "Room " + Id;

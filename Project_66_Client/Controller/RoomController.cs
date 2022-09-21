@@ -6,8 +6,10 @@ namespace Project_66_Client.Controller
     internal class RoomController
     {
         RoomView _roomView;
-        List<int> _deleteBullets = new List<int>();
-        List<TankController> tankControllers = new List<TankController>();
+        List<int> _deleteBullets = new();
+        List<int> _bricksRemove = new();
+        List<TankController> tankControllers = new();
+        List<BrickController> brickControllers = new();
         public RoomController(RoomView roomView)
         {
             _roomView = roomView;
@@ -146,6 +148,49 @@ namespace Project_66_Client.Controller
                     _roomView.Controls.Add(bulletView);
                 }
             }
+        }
+        public void LoadBricks(List<BrickModel> bricks)
+        {
+            foreach (var model in bricks)
+            {
+                if (!CheckBrickToControllers(model))
+                {
+                    brickControllers.Add(new BrickController(_roomView.AddBrick(), model));
+                }
+            }
+
+            int i = 0;
+            foreach (var controller in brickControllers)
+            {
+                if (!CheckBrickToModels(bricks, controller.GetBrickModel()))
+                {
+                    _roomView.RemoveBrick(controller.GetBrickView());
+                    _bricksRemove.Add(i);
+                }
+                i++;
+            }
+            _bricksRemove.Reverse();
+            foreach (var item in _bricksRemove)
+            {
+                brickControllers.RemoveAt(item);
+            }
+            _bricksRemove.Clear();
+        }
+        public bool CheckBrickToControllers(BrickModel brickModel)
+        {
+            foreach (var controller in brickControllers)
+            {
+                if (controller.GetBrickModel().Id == brickModel.Id) return true;
+            }
+            return false;
+        }
+        public bool CheckBrickToModels(List<BrickModel> bricks, BrickModel brickModel)
+        {
+            foreach (var model in bricks)
+            {
+                if (model.Id == brickModel.Id) return true;
+            }
+            return false;
         }
     }
 }

@@ -268,6 +268,7 @@ namespace Project_66_Client.Controller
                                         _gameView.PlayersClear();
                                         _gameView.PlayersAdd(_players.ToArray());
                                     }
+                                    _roomController.LoadBricks(client.Bricks);
                                     _roomController.LoadTanks(client.Tanks);
                                     _roomController.LoadBullets(client.Bullets);
                                 });

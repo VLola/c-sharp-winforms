@@ -15,5 +15,6 @@
         public TankModel Tank { get; set; }
         public List<TankModel> Tanks { get; set; }
         public List<BulletModel> Bullets { get; set; }
+        public List<BrickModel> Bricks { get; set; }
     }
 }

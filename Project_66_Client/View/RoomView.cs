@@ -36,5 +36,35 @@
                 Controls.Remove(tankView);
             }
         }
+        public BrickView AddBrick()
+        {
+            BrickView brickView = new();
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    Controls.Add(brickView);
+                }));
+            }
+            else
+            {
+                Controls.Add(brickView);
+            }
+            return brickView;
+        }
+        public void RemoveBrick(BrickView brickView)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    Controls.Remove(brickView);
+                }));
+            }
+            else
+            {
+                Controls.Remove(brickView);
+            }
+        }
     }
 }
