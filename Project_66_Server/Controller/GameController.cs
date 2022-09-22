@@ -17,6 +17,7 @@ namespace Project_66_Server.Controller
         int _room = 1;
         GameView _gameView;
         List<int> _deleteBricks = new List<int>();
+        List<int> _deleteBullets = new List<int>();
         List<RoomModel> _rooms = new List<RoomModel>();
         public GameController(GameView gameView) {
             _gameView = gameView;
@@ -340,7 +341,6 @@ namespace Project_66_Server.Controller
         private async void RunBullets(RoomModel roomModel)
         {
             await Task.Run(async() => {
-                List<int> removeBullets = new List<int>();
                 while (true)
                 {
                     await Task.Delay(100);
@@ -355,7 +355,7 @@ namespace Project_66_Server.Controller
                                 else if (bullet.Direction == "Up") bullet.Y = bullet.Y - 10;
                                 else if (bullet.Direction == "Right") bullet.X = bullet.X + 10;
                                 else if (bullet.Direction == "Left") bullet.X = bullet.X - 10;
-                                if (bullet.X < 0 || bullet.X > 800 || bullet.Y < 0 || bullet.Y > 450) removeBullets.Add(i);
+                                if (bullet.X < 0 || bullet.X > 800 || bullet.Y < 0 || bullet.Y > 450) _deleteBullets.Add(i);
                                 bool check = true;
                                 int j = 0;
                                 lock (roomModel.Bricks)
@@ -372,7 +372,7 @@ namespace Project_66_Server.Controller
                                 }
                                 if (!check)
                                 {
-                                    if (!removeBullets.Contains(i)) removeBullets.Add(i);
+                                    if (!_deleteBullets.Contains(i)) _deleteBullets.Add(i);
                                     _deleteBricks.Reverse();
                                     lock (roomModel.Bricks) foreach (var item in _deleteBricks)
                                         {
@@ -388,7 +388,7 @@ namespace Project_66_Server.Controller
                                         {
                                             if (!it.Killed && bullet.Y > it.Y && bullet.X > it.X && bullet.Y < it.Y + 50 && bullet.X < it.X + 50)
                                             {
-                                                if (!removeBullets.Contains(i)) removeBullets.Add(i);
+                                                if (!_deleteBullets.Contains(i)) _deleteBullets.Add(i);
                                                 int damage = it.Defence - 1 - bullet.Power;
                                                 if (damage < 0)
                                                 {
@@ -417,12 +417,12 @@ namespace Project_66_Server.Controller
                                 }
                                 i++;
                             }
-                            removeBullets.Reverse();
-                            foreach (var item in removeBullets)
+                            _deleteBullets.Reverse();
+                            foreach (var item in _deleteBullets)
                             {
                                 roomModel.Bullets.RemoveAt(item);
                             }
-                            removeBullets.Clear();
+                            _deleteBullets.Clear();
                             roomModel.IsReload = true;
                         }
                     }
