@@ -134,40 +134,53 @@ namespace Project_66_Client.Controller
             {
                 if (_clientController.GetLocationY() > 0) 
                 {
-                    _clientController.Up();
-                    _clientController.SetIsDirection(true);
-                    SendClient();
-                    _clientController.SetIsDirection(false);
+                    if (IsRun())
+                    {
+                        _clientController.Up();
+                        _clientController.SetIsDirection(true);
+                        SendClient();
+                        _clientController.SetIsDirection(false);
+                    }
                 }
             }
             else if (e.KeyCode == Keys.Down)
             {
-                if (_clientController.GetLocationY() < 400)
+
+                if (IsRun())
                 {
-                    _clientController.Down();
-                    _clientController.SetIsDirection(true);
-                    SendClient();
-                    _clientController.SetIsDirection(false);
+                    if (_clientController.GetLocationY() < 400)
+                    {
+                        _clientController.Down();
+                        _clientController.SetIsDirection(true);
+                        SendClient();
+                        _clientController.SetIsDirection(false);
+                    }
                 }
             }
             else if (e.KeyCode == Keys.Left)
             {
-                if (_clientController.GetLocationX() > 0)
+                if (IsRun())
                 {
-                    _clientController.Left();
-                    _clientController.SetIsDirection(true);
-                    SendClient();
-                    _clientController.SetIsDirection(false);
+                    if (_clientController.GetLocationX() > 0)
+                    {
+                        _clientController.Left();
+                        _clientController.SetIsDirection(true);
+                        SendClient();
+                        _clientController.SetIsDirection(false);
+                    }
                 }
             }
             else if (e.KeyCode == Keys.Right)
             {
-                if (_clientController.GetLocationX() < 750)
+                if (IsRun())
                 {
-                    _clientController.Right();
-                    _clientController.SetIsDirection(true);
-                    SendClient();
-                    _clientController.SetIsDirection(false);
+                    if (_clientController.GetLocationX() < 750)
+                    {
+                        _clientController.Right();
+                        _clientController.SetIsDirection(true);
+                        SendClient();
+                        _clientController.SetIsDirection(false);
+                    }
                 }
             }
             else if (e.KeyCode == Keys.Space)
@@ -180,6 +193,21 @@ namespace Project_66_Client.Controller
             {
                 Disconnect();
             }
+        }
+        private bool IsRun()
+        {
+            lock (_roomController.BrickControllers) foreach (var item in _roomController.BrickControllers)
+                {
+                    if (new Rectangle(new Point(_clientController.GetLocationX(), _clientController.GetLocationY()), new Size(50, 50)).IntersectsWith(new Rectangle(item.GetBrickView().GetLocation(), new Size(25, 25))))
+                    {
+                        if (_clientController.GetDirection() == "Down") _clientController.SetLocationY(_clientController.GetLocationY() - 1);
+                        else if (_clientController.GetDirection() == "Up") _clientController.SetLocationY(_clientController.GetLocationY() + 1);
+                        else if (_clientController.GetDirection() == "Right") _clientController.SetLocationX(_clientController.GetLocationX() - 1);
+                        else if (_clientController.GetDirection() == "Left") _clientController.SetLocationX(_clientController.GetLocationX() + 1);
+                        return false;
+                    }
+                }
+            return true;
         }
         private void SendClient()
         {

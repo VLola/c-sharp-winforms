@@ -9,7 +9,7 @@ namespace Project_66_Client.Controller
         List<int> _deleteBullets = new();
         List<int> _bricksRemove = new();
         List<TankController> tankControllers = new();
-        List<BrickController> brickControllers = new();
+        public List<BrickController> BrickControllers = new();
         public RoomController(RoomView roomView)
         {
             _roomView = roomView;
@@ -151,34 +151,36 @@ namespace Project_66_Client.Controller
         }
         public void LoadBricks(List<BrickModel> bricks)
         {
-            foreach (var model in bricks)
-            {
-                if (!CheckBrickToControllers(model))
+            lock (BrickControllers) {
+                foreach (var model in bricks)
                 {
-                    brickControllers.Add(new BrickController(_roomView.AddBrick(), model));
+                    if (!CheckBrickToControllers(model))
+                    {
+                        BrickControllers.Add(new BrickController(_roomView.AddBrick(), model));
+                    }
                 }
-            }
 
-            int i = 0;
-            foreach (var controller in brickControllers)
-            {
-                if (!CheckBrickToModels(bricks, controller.GetBrickModel()))
+                int i = 0;
+                foreach (var controller in BrickControllers)
                 {
-                    _roomView.RemoveBrick(controller.GetBrickView());
-                    _bricksRemove.Add(i);
+                    if (!CheckBrickToModels(bricks, controller.GetBrickModel()))
+                    {
+                        _roomView.RemoveBrick(controller.GetBrickView());
+                        _bricksRemove.Add(i);
+                    }
+                    i++;
                 }
-                i++;
-            }
-            _bricksRemove.Reverse();
-            foreach (var item in _bricksRemove)
-            {
-                brickControllers.RemoveAt(item);
-            }
-            _bricksRemove.Clear();
+                _bricksRemove.Reverse();
+                foreach (var item in _bricksRemove)
+                {
+                    BrickControllers.RemoveAt(item);
+                }
+                _bricksRemove.Clear();
+            } 
         }
         public bool CheckBrickToControllers(BrickModel brickModel)
         {
-            foreach (var controller in brickControllers)
+            foreach (var controller in BrickControllers)
             {
                 if (controller.GetBrickModel().Id == brickModel.Id) return true;
             }

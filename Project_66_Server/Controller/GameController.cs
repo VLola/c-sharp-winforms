@@ -16,6 +16,7 @@ namespace Project_66_Server.Controller
         int _bulletId = 1;
         int _room = 1;
         GameView _gameView;
+        List<int> _deleteBricks = new List<int>();
         List<RoomModel> _rooms = new List<RoomModel>();
         public GameController(GameView gameView) {
             _gameView = gameView;
@@ -220,23 +221,8 @@ namespace Project_66_Server.Controller
                     }
                     if (!roomModel.Tanks[i].Killed)
                     {
-                        lock (roomModel.Bricks)
-                        {
-                            bool run = true;
-                            foreach (var it in roomModel.Bricks)
-                            {
-                                if (client.Tank.Y > it.Y && client.Tank.X > it.X && client.Tank.Y < it.Y + 25 && client.Tank.X < it.X + 25)
-                                {
-                                    run = false;
-                                    break;
-                                }
-                            }
-                            if (run)
-                            {
-                                roomModel.Tanks[i] = client.Tank;
-                                roomModel.IsReload = true;
-                            }
-                        }
+                        roomModel.Tanks[i] = client.Tank;
+                        roomModel.IsReload = true;
                     }
                 }
             });
@@ -370,37 +356,64 @@ namespace Project_66_Server.Controller
                                 else if (bullet.Direction == "Right") bullet.X = bullet.X + 10;
                                 else if (bullet.Direction == "Left") bullet.X = bullet.X - 10;
                                 if (bullet.X < 0 || bullet.X > 800 || bullet.Y < 0 || bullet.Y > 450) removeBullets.Add(i);
-                                foreach (var it in roomModel.Tanks)
+                                bool check = true;
+                                int j = 0;
+                                lock (roomModel.Bricks)
                                 {
-                                    if (!it.Killed && bullet.Y > it.Y && bullet.X > it.X && bullet.Y < it.Y + 50 && bullet.X < it.X + 50) {
-                                        if(!removeBullets.Contains(i)) removeBullets.Add(i);
-                                        lock (roomModel.Tanks) {
-                                            int damage = it.Defence - 1 - bullet.Power;
-                                            if(damage < 0)
+                                    foreach (var brick in roomModel.Bricks)
+                                    {
+                                        if (bullet.Y >= brick.Y && bullet.X >= brick.X && bullet.Y <= brick.Y + 25 && bullet.X <= brick.X + 25 || bullet.Y + 5 >= brick.Y && bullet.X + 5 >= brick.X && bullet.Y + 5 <= brick.Y + 25 && bullet.X + 5 <= brick.X + 25)
+                                        {
+                                            check = false;
+                                            _deleteBricks.Add(j);
+                                        }
+                                        j++;
+                                    }
+                                }
+                                if (!check)
+                                {
+                                    if (!removeBullets.Contains(i)) removeBullets.Add(i);
+                                    _deleteBricks.Reverse();
+                                    lock (roomModel.Bricks) foreach (var item in _deleteBricks)
+                                        {
+                                            roomModel.Bricks.RemoveAt(item);
+                                        }
+
+                                    _deleteBricks.Clear();
+                                }
+                                if (check)
+                                {
+                                    lock (roomModel.Tanks) {
+                                        foreach (var it in roomModel.Tanks)
+                                        {
+                                            if (!it.Killed && bullet.Y > it.Y && bullet.X > it.X && bullet.Y < it.Y + 50 && bullet.X < it.X + 50)
                                             {
-                                                it.Health += damage;
-                                                if (it.Health <= 0)
+                                                if (!removeBullets.Contains(i)) removeBullets.Add(i);
+                                                int damage = it.Defence - 1 - bullet.Power;
+                                                if (damage < 0)
                                                 {
-                                                    it.Killed = true;
-                                                    it.Deaths++;
-                                                    Connect.UpdateDeaths(it.Name, it.Deaths);
-                                                    Respawn(it.Name, roomModel);
-                                                    foreach (var tank in roomModel.Tanks)
+                                                    it.Health += damage;
+                                                    if (it.Health <= 0)
                                                     {
-                                                        if (tank.Name == bullet.Name)
+                                                        it.Killed = true;
+                                                        it.Deaths++;
+                                                        Connect.UpdateDeaths(it.Name, it.Deaths);
+                                                        Respawn(it.Name, roomModel);
+                                                        foreach (var tank in roomModel.Tanks)
                                                         {
-                                                            tank.Murders++;
-                                                            tank.Coins += 10;
-                                                            Connect.UpdateMurders(tank.Name, tank.Murders, tank.Coins);
-                                                            break;
+                                                            if (tank.Name == bullet.Name)
+                                                            {
+                                                                tank.Murders++;
+                                                                tank.Coins += 10;
+                                                                Connect.UpdateMurders(tank.Name, tank.Murders, tank.Coins);
+                                                                break;
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
-                                            
-                                            
                                         }
-                                    }
+                                    } 
                                 }
                                 i++;
                             }

@@ -42,5 +42,9 @@
                 Location = new(x, y);
             }
         }
+        public Point GetLocation()
+        {
+            return Location;
+        }
     }
 }
