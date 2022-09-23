@@ -225,91 +225,99 @@ namespace Project_66_Client.Controller
         {
             Task.Run(() =>
             {
-                while (true)
+                try
                 {
-                    try
-                    {
-                        int bytes = 0;
-                        byte[] buffer = new byte[64000];
-                        StringBuilder builder = new StringBuilder();
-                        do
-                        {
-                            bytes = _socket.Receive(buffer);
-                        } while (_socket.Available > 0);
 
-                        builder.Append(Encoding.Unicode.GetString(buffer, 0, bytes));
-                        if (builder.ToString() == "")
+                    while (true)
+                    {
+                        try
                         {
-                            _socket.Shutdown(SocketShutdown.Both);
-                            _socket.Close();
-                            break;
-                        }
-                        else
-                        {
-                            ClientModel? client = JsonSerializer.Deserialize<ClientModel>(builder.ToString());
-                            if (client != null)
+                            int bytes = 0;
+                            byte[] buffer = new byte[64000];
+                            StringBuilder builder = new StringBuilder();
+                            do
                             {
-                                if (client.IsLogin)
+                                bytes = _socket.Receive(buffer);
+                            } while (_socket.Available > 0);
+
+                            builder.Append(Encoding.Unicode.GetString(buffer, 0, bytes));
+                            if (builder.ToString() == "")
+                            {
+                                _socket.Shutdown(SocketShutdown.Both);
+                                _socket.Close();
+                                break;
+                            }
+                            else
+                            {
+                                ClientModel? client = JsonSerializer.Deserialize<ClientModel>(builder.ToString());
+                                if (client != null)
                                 {
-                                    if (client.Login)
+                                    if (client.IsLogin)
                                     {
-                                        _gameView.ClientVisible();
-                                        _gameView.SetClientName(_clientController.GetName());
-                                        _infoController.SetInfo(client.Tank);
-                                    }
-                                    else MessageBox.Show("Login error!");
-                                }
-                                else if (client.IsRegister)
-                                {
-                                    if (client.Login)
-                                    {
-                                        _gameView.ClientVisible();
-                                        _gameView.SetClientName(_clientController.GetName());
-                                        _infoController.SetInfo(client.Tank);
-                                    }
-                                    else MessageBox.Show("Register error!");
-                                }
-                                else if (client.IsStart)
-                                {
-                                    _gameView.GameVisible();
-                                }
-                                else if(client.BuyDefence || client.BuyPower)
-                                {
-                                    _infoController.SetInfo(client.Tank);
-                                }
-                                Task.Run(() =>
-                                {
-                                    _players.Clear();
-                                    foreach (var item in client.Tanks)
-                                    {
-                                        _players.Add(item.Name);
-                                        if (item.Name == _clientController.GetName())
+                                        if (client.Login)
                                         {
-                                            _clientController.SetTank(item);
-                                            _infoController.SetInfo(item);
+                                            _gameView.ClientVisible();
+                                            _gameView.SetClientName(_clientController.GetName());
+                                            _infoController.SetInfo(client.Tank);
                                         }
+                                        else MessageBox.Show("Login error!");
                                     }
-                                    if (!_playersCheck.SequenceEqual(_players))
+                                    else if (client.IsRegister)
                                     {
-                                        _playersCheck.Clear();
-                                        _playersCheck.AddRange(_players);
-                                        _gameView.PlayersClear();
-                                        _gameView.PlayersAdd(_players.ToArray());
+                                        if (client.Login)
+                                        {
+                                            _gameView.ClientVisible();
+                                            _gameView.SetClientName(_clientController.GetName());
+                                            _infoController.SetInfo(client.Tank);
+                                        }
+                                        else MessageBox.Show("Register error!");
                                     }
-                                    _roomController.LoadBricks(client.Bricks);
-                                    _roomController.LoadTanks(client.Tanks);
-                                    _roomController.LoadBullets(client.Bullets);
-                                });
+                                    else if (client.IsStart)
+                                    {
+                                        _gameView.GameVisible();
+                                    }
+                                    else if (client.BuyDefence || client.BuyPower)
+                                    {
+                                        _infoController.SetInfo(client.Tank);
+                                    }
+                                    Task.Run(() =>
+                                    {
+                                        _players.Clear();
+                                        if(client.Tanks != null) foreach (var item in client.Tanks)
+                                        {
+                                            _players.Add(item.Name);
+                                            if (item.Name == _clientController.GetName())
+                                            {
+                                                _clientController.SetTank(item);
+                                                _infoController.SetInfo(item);
+                                            }
+                                        }
+                                        if (!_playersCheck.SequenceEqual(_players))
+                                        {
+                                            _playersCheck.Clear();
+                                            _playersCheck.AddRange(_players);
+                                            _gameView.PlayersClear();
+                                            _gameView.PlayersAdd(_players.ToArray());
+                                        }
+                                        _roomController.LoadBricks(client.Bricks);
+                                        _roomController.LoadTanks(client.Tanks);
+                                        _roomController.LoadBullets(client.Bullets);
+                                    });
+                                }
                             }
                         }
-                    }
-                    catch
-                    {
-                        if(_socket != null)
+                        catch
                         {
-                            _socket.Shutdown(SocketShutdown.Both);
-                            _socket.Close();
+                            
                         }
+                    }
+                }
+                finally
+                {
+                    if (_socket != null)
+                    {
+                        _socket.Shutdown(SocketShutdown.Both);
+                        _socket.Close();
                     }
                 }
             });

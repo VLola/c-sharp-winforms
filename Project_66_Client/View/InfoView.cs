@@ -64,7 +64,7 @@ namespace Project_66_Client.View
         }
         public void SetPower(string value)
         {
-            if (InvokeRequired)
+            if (Power.InvokeRequired)
             {
                 Power.Text = value;
             }
@@ -75,7 +75,7 @@ namespace Project_66_Client.View
         }
         public void SetDefence(string value)
         {
-            if (InvokeRequired)
+            if (Defence.InvokeRequired)
             {
                 Defence.Text = value;
             }
@@ -86,7 +86,7 @@ namespace Project_66_Client.View
         }
         public void SetCoins(string value)
         {
-            if (InvokeRequired)
+            if (Coins.InvokeRequired)
             {
                 Coins.Text = value;
             }
@@ -97,7 +97,7 @@ namespace Project_66_Client.View
         }
         public void SetMurders(string value)
         {
-            if (InvokeRequired)
+            if (Murders.InvokeRequired)
             {
                 Murders.Text = value;
             }
@@ -108,7 +108,7 @@ namespace Project_66_Client.View
         }
         public void SetDeaths(string value)
         {
-            if (InvokeRequired)
+            if (Deaths.InvokeRequired)
             {
                 Deaths.Text = value;
             }
