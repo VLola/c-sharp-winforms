@@ -172,11 +172,31 @@ namespace Project_66_Client.View
         }
         public void PlayersClear()
         {
-            Players.Items.Clear();
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    Players.Items.Clear();
+                }));
+            }
+            else
+            {
+                Players.Items.Clear();
+            }
         }
         public void PlayersAdd(string[] arr)
         {
-            Players.Items.AddRange(arr);
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    Players.Items.AddRange(arr);
+                }));
+            }
+            else
+            {
+                Players.Items.AddRange(arr);
+            }
         }
         public int GetPlayers()
         {
@@ -228,7 +248,17 @@ namespace Project_66_Client.View
         }
         public void SetClientName(string name)
         {
-            _clientView.ClientName.Text = name;
+            if (_clientView.ClientName.InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    _clientView.ClientName.Text = name;
+                }));
+            }
+            else
+            {
+                _clientView.ClientName.Text = name;
+            }
         }
     }
 }

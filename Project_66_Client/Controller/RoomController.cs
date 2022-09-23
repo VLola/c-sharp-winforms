@@ -16,34 +16,39 @@ namespace Project_66_Client.Controller
         }
         public void LoadTanks(List<TankModel> tankModels)
         {
-            // Add
-            lock (tankModels) foreach (var item in tankModels)
+            if(tankModels != null)
             {
-                    if (!CheckName(item.Name)) { 
-                        lock (tankControllers) tankControllers.Add(new TankController(_roomView, new TankView(), item)); 
-                    }
-                    else
+                // Add
+                lock (tankModels) foreach (var item in tankModels)
                     {
-                        LoadTank(item);
+                        if (!CheckName(item.Name))
+                        {
+                            lock (tankControllers) tankControllers.Add(new TankController(_roomView, new TankView(), item));
+                        }
+                        else
+                        {
+                            LoadTank(item);
+                        }
+                    }
+                // Delete
+                int i = 0;
+                bool check = false;
+                lock (tankControllers) foreach (var item in tankControllers)
+                    {
+                        if (!CheckDeleteName(item.Name, tankModels))
+                        {
+                            check = true;
+                            break;
+                        }
+                        i++;
+                    }
+                if (check)
+                    lock (tankControllers)
+                    {
+                        tankControllers[i].DisposeTank();
+                        tankControllers.RemoveAt(i);
                     }
             }
-            // Delete
-            int i = 0;
-            bool check = false;
-            lock(tankControllers) foreach (var item in tankControllers)
-            {
-                    if (!CheckDeleteName(item.Name, tankModels)) {
-                        check = true;
-                        break;
-                    }
-                    i++;
-            }
-            if (check) 
-                lock (tankControllers)
-                {
-                    tankControllers[i].DisposeTank();
-                    tankControllers.RemoveAt(i);
-                }
         }
         private void LoadTank(TankModel tankModel)
         {
@@ -128,6 +133,7 @@ namespace Project_66_Client.Controller
         }
         private void AddBullet(List<BulletModel> value)
         {
+            if(value != null)
             foreach (var it in value)
             {
                 bool check = false;

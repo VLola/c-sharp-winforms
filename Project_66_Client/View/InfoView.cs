@@ -64,9 +64,12 @@ namespace Project_66_Client.View
         }
         public void SetPower(string value)
         {
-            if (Power.InvokeRequired)
+            if (InvokeRequired)
             {
-                Power.Text = value;
+                Invoke(new Action(() =>
+                {
+                    Power.Text = value;
+                }));
             }
             else
             {
@@ -75,9 +78,12 @@ namespace Project_66_Client.View
         }
         public void SetDefence(string value)
         {
-            if (Defence.InvokeRequired)
+            if (InvokeRequired)
             {
-                Defence.Text = value;
+                Invoke(new Action(() =>
+                {
+                    Defence.Text = value;
+                }));
             }
             else
             {
@@ -86,9 +92,12 @@ namespace Project_66_Client.View
         }
         public void SetCoins(string value)
         {
-            if (Coins.InvokeRequired)
+            if (InvokeRequired)
             {
-                Coins.Text = value;
+                Invoke(new Action(() =>
+                {
+                    Coins.Text = value;
+                }));
             }
             else
             {
@@ -97,9 +106,12 @@ namespace Project_66_Client.View
         }
         public void SetMurders(string value)
         {
-            if (Murders.InvokeRequired)
+            if (InvokeRequired)
             {
-                Murders.Text = value;
+                Invoke(new Action(() =>
+                {
+                    Murders.Text = value;
+                }));
             }
             else
             {
@@ -108,9 +120,12 @@ namespace Project_66_Client.View
         }
         public void SetDeaths(string value)
         {
-            if (Deaths.InvokeRequired)
+            if (InvokeRequired)
             {
-                Deaths.Text = value;
+                Invoke(new Action(() =>
+                {
+                    Deaths.Text = value;
+                }));
             }
             else
             {

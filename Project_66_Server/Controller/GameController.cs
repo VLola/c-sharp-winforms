@@ -32,7 +32,11 @@ namespace Project_66_Server.Controller
                 serverSocket.Listen(10);
                 while (true)
                 {
-                    ConnectClient(serverSocket.Accept());
+                    try
+                    {
+                        ConnectClient(serverSocket.Accept());
+                    } 
+                    catch { }
                 }
             });
         }
@@ -74,134 +78,137 @@ namespace Project_66_Server.Controller
                         }
                         else
                         {
-                            Client client = JsonConvert.DeserializeObject<Client>(builder.ToString());
-                            if (client.IsLogin && client.Tank.Name != null && client.Tank.Name != "" && client.Password != null && client.Password != "")
-                            {
-                                if (Connect.LoginUser(client.Tank.Name, client.Password))
+                            try {
+                                Client client = JsonConvert.DeserializeObject<Client>(builder.ToString());
+                                if (client.IsLogin && client.Tank.Name != null && client.Tank.Name != "" && client.Password != null && client.Password != "")
                                 {
-                                    NameTank = client.Tank.Name;
+                                    if (Connect.LoginUser(client.Tank.Name, client.Password))
+                                    {
+                                        NameTank = client.Tank.Name;
+                                        User user = Connect.GetUser(NameTank);
+                                        client.Tank.Coins = user.Coins;
+                                        client.Tank.Power = user.Power;
+                                        client.Tank.Defence = user.Defence;
+                                        client.Tank.Murders = user.Murders;
+                                        client.Tank.Deaths = user.Deaths;
+                                        client.Login = true;
+                                        clientSocket.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
+                                    }
+                                    else
+                                    {
+                                        client.Login = false;
+                                        clientSocket.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
+                                    }
+                                }
+                                else if (client.IsRegister && client.Tank.Name != null && client.Tank.Name != "" && client.Password != null && client.Password != "")
+                                {
+                                    if (Connect.RegistrationUser(client.Tank.Name, client.Password))
+                                    {
+                                        NameTank = client.Tank.Name;
+                                        client.Tank.Coins = 0;
+                                        client.Tank.Power = 0;
+                                        client.Tank.Defence = 0;
+                                        client.Tank.Murders = 0;
+                                        client.Tank.Deaths = 0;
+                                        client.Login = true;
+                                        clientSocket.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
+                                    }
+                                    else
+                                    {
+                                        client.Login = false;
+                                        clientSocket.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
+                                    }
+                                }
+                                else if (client.IsStart)
+                                {
                                     User user = Connect.GetUser(NameTank);
                                     client.Tank.Coins = user.Coins;
                                     client.Tank.Power = user.Power;
                                     client.Tank.Defence = user.Defence;
                                     client.Tank.Murders = user.Murders;
                                     client.Tank.Deaths = user.Deaths;
-                                    client.Login = true;
+                                    roomModel = AddedTank(client, clientSocket);
                                     clientSocket.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
+                                    roomModel.IsReload = true;
                                 }
-                                else
+                                else if (client.IsDirection)
                                 {
-                                    client.Login = false;
-                                    clientSocket.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
+                                    Run(roomModel, client);
                                 }
-                            }
-                            else if (client.IsRegister && client.Tank.Name != null && client.Tank.Name != "" && client.Password != null && client.Password != "")
-                            {
-                                if (Connect.RegistrationUser(client.Tank.Name, client.Password))
+                                else if (client.IsShot)
                                 {
-                                    NameTank = client.Tank.Name;
-                                    client.Tank.Coins = 0;
-                                    client.Tank.Power = 0;
-                                    client.Tank.Defence = 0;
-                                    client.Tank.Murders = 0;
-                                    client.Tank.Deaths = 0;
-                                    client.Login = true;
-                                    clientSocket.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
-                                }
-                                else
-                                {
-                                    client.Login = false;
-                                    clientSocket.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
-                                }
-                            }
-                            else if (client.IsStart)
-                            {
-                                User user = Connect.GetUser(NameTank);
-                                client.Tank.Coins = user.Coins;
-                                client.Tank.Power = user.Power;
-                                client.Tank.Defence = user.Defence;
-                                client.Tank.Murders = user.Murders;
-                                client.Tank.Deaths = user.Deaths;
-                                roomModel = AddedTank(client, clientSocket);
-                                clientSocket.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
-                                roomModel.IsReload = true;
-                            }
-                            else if (client.IsDirection)
-                            {
-                                Run(roomModel, client);
-                            }
-                            else if (client.IsShot)
-                            {
-                                lock (roomModel.Tanks)
-                                {
-                                    int i = 0;
-                                    foreach (var item in roomModel.Tanks)
+                                    lock (roomModel.Tanks)
                                     {
-                                        if (item.Name == client.Tank.Name) break;
-                                        i++;
+                                        int i = 0;
+                                        foreach (var item in roomModel.Tanks)
+                                        {
+                                            if (item.Name == client.Tank.Name) break;
+                                            i++;
+                                        }
+                                        if (!roomModel.Tanks[i].Killed)
+                                        {
+                                            BulletModel bulletModel = new BulletModel();
+                                            bulletModel.Id = _bulletId++;
+                                            bulletModel.Name = client.Tank.Name;
+                                            bulletModel.Power = client.Tank.Power;
+                                            bulletModel.Direction = client.Tank.Direction;
+                                            if (bulletModel.Direction == "Right")
+                                            {
+                                                bulletModel.X = client.Tank.X + 50;
+                                                bulletModel.Y = client.Tank.Y + 22;
+                                            }
+                                            else if (bulletModel.Direction == "Left")
+                                            {
+                                                bulletModel.X = client.Tank.X - 5;
+                                                bulletModel.Y = client.Tank.Y + 22;
+                                            }
+                                            else if (bulletModel.Direction == "Up")
+                                            {
+                                                bulletModel.X = client.Tank.X + 22;
+                                                bulletModel.Y = client.Tank.Y - 5;
+                                            }
+                                            else if (bulletModel.Direction == "Down")
+                                            {
+                                                bulletModel.X = client.Tank.X + 22;
+                                                bulletModel.Y = client.Tank.Y + 50;
+                                            }
+                                            lock (roomModel.Bullets) roomModel.Bullets.Add(bulletModel);
+                                            roomModel.IsReload = true;
+                                        }
                                     }
-                                    if (!roomModel.Tanks[i].Killed)
+                                }
+                                else if (client.BuyDefence)
+                                {
+                                    int coins = Connect.GetCoins(client.Tank.Name);
+                                    if (coins >= 5)
                                     {
-                                        BulletModel bulletModel = new BulletModel();
-                                        bulletModel.Id = _bulletId++;
-                                        bulletModel.Name = client.Tank.Name;
-                                        bulletModel.Power = client.Tank.Power;
-                                        bulletModel.Direction = client.Tank.Direction;
-                                        if (bulletModel.Direction == "Right")
-                                        {
-                                            bulletModel.X = client.Tank.X + 50;
-                                            bulletModel.Y = client.Tank.Y + 22;
-                                        }
-                                        else if (bulletModel.Direction == "Left")
-                                        {
-                                            bulletModel.X = client.Tank.X - 5;
-                                            bulletModel.Y = client.Tank.Y + 22;
-                                        }
-                                        else if (bulletModel.Direction == "Up")
-                                        {
-                                            bulletModel.X = client.Tank.X + 22;
-                                            bulletModel.Y = client.Tank.Y - 5;
-                                        }
-                                        else if (bulletModel.Direction == "Down")
-                                        {
-                                            bulletModel.X = client.Tank.X + 22;
-                                            bulletModel.Y = client.Tank.Y + 50;
-                                        }
-                                        lock (roomModel.Bullets) roomModel.Bullets.Add(bulletModel);
-                                        roomModel.IsReload = true;
+                                        User user = Connect.GetUser(NameTank);
+                                        client.Tank.Coins = user.Coins - 5;
+                                        client.Tank.Power = user.Power;
+                                        client.Tank.Defence = user.Defence + 1;
+                                        client.Tank.Murders = user.Murders;
+                                        client.Tank.Deaths = user.Deaths;
+                                        Connect.UpdateDefence(client.Tank.Name, client.Tank.Defence, client.Tank.Coins);
+                                        clientSocket.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
+                                    }
+                                }
+                                else if (client.BuyPower)
+                                {
+                                    int coins = Connect.GetCoins(client.Tank.Name);
+                                    if (coins >= 5)
+                                    {
+                                        User user = Connect.GetUser(NameTank);
+                                        client.Tank.Coins = user.Coins - 5;
+                                        client.Tank.Power = user.Power + 1;
+                                        client.Tank.Defence = user.Defence;
+                                        client.Tank.Murders = user.Murders;
+                                        client.Tank.Deaths = user.Deaths;
+                                        Connect.UpdatePower(client.Tank.Name, client.Tank.Power, client.Tank.Coins);
+                                        clientSocket.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
                                     }
                                 }
                             }
-                            else if (client.BuyDefence)
-                            {
-                                int coins = Connect.GetCoins(client.Tank.Name);
-                                if (coins >= 5)
-                                {
-                                    User user = Connect.GetUser(NameTank);
-                                    client.Tank.Coins = user.Coins - 5;
-                                    client.Tank.Power = user.Power;
-                                    client.Tank.Defence = user.Defence + 1;
-                                    client.Tank.Murders = user.Murders;
-                                    client.Tank.Deaths = user.Deaths;
-                                    Connect.UpdateDefence(client.Tank.Name, client.Tank.Defence, client.Tank.Coins);
-                                    clientSocket.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
-                                }
-                            }
-                            else if (client.BuyPower)
-                            {
-                                int coins = Connect.GetCoins(client.Tank.Name);
-                                if (coins >= 5)
-                                {
-                                    User user = Connect.GetUser(NameTank);
-                                    client.Tank.Coins = user.Coins - 5;
-                                    client.Tank.Power = user.Power + 1;
-                                    client.Tank.Defence = user.Defence;
-                                    client.Tank.Murders = user.Murders;
-                                    client.Tank.Deaths = user.Deaths;
-                                    Connect.UpdatePower(client.Tank.Name, client.Tank.Power, client.Tank.Coins);
-                                    clientSocket.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
-                                }
-                            }
+                            catch { }
                         }
                     }
                     catch {  }
@@ -211,21 +218,23 @@ namespace Project_66_Server.Controller
         private async void Run(RoomModel roomModel, Client client)
         {
             await Task.Run(()=>{
-
-                lock (roomModel.Tanks)
+                try
                 {
-                    int i = 0;
-                    foreach (var item in roomModel.Tanks)
+                    lock (roomModel.Tanks)
                     {
-                        if (item.Name == client.Tank.Name) break;
-                        i++;
+                        int i = 0;
+                        foreach (var item in roomModel.Tanks)
+                        {
+                            if (item.Name == client.Tank.Name) break;
+                            i++;
+                        }
+                        if (!roomModel.Tanks[i].Killed)
+                        {
+                            roomModel.Tanks[i] = client.Tank;
+                            roomModel.IsReload = true;
+                        }
                     }
-                    if (!roomModel.Tanks[i].Killed)
-                    {
-                        roomModel.Tanks[i] = client.Tank;
-                        roomModel.IsReload = true;
-                    }
-                }
+                } catch { }
             });
         }
         private RoomModel GetRoom(int players)
@@ -343,89 +352,94 @@ namespace Project_66_Server.Controller
             await Task.Run(async() => {
                 while (true)
                 {
-                    await Task.Delay(100);
-                    if (roomModel.Bullets.Count > 0)
+                    try
                     {
-                        lock (roomModel.Bullets)
+                        await Task.Delay(100);
+                        if (roomModel.Bullets.Count > 0)
                         {
-                            int i = 0;
-                            foreach (var bullet in roomModel.Bullets)
+                            lock (roomModel.Bullets)
                             {
-                                if (bullet.Direction == "Down") bullet.Y = bullet.Y + 10;
-                                else if (bullet.Direction == "Up") bullet.Y = bullet.Y - 10;
-                                else if (bullet.Direction == "Right") bullet.X = bullet.X + 10;
-                                else if (bullet.Direction == "Left") bullet.X = bullet.X - 10;
-                                if (bullet.X < 0 || bullet.X > 800 || bullet.Y < 0 || bullet.Y > 450) _deleteBullets.Add(i);
-                                bool check = true;
-                                int j = 0;
-                                lock (roomModel.Bricks)
+                                int i = 0;
+                                foreach (var bullet in roomModel.Bullets)
                                 {
-                                    foreach (var brick in roomModel.Bricks)
+                                    if (bullet.Direction == "Down") bullet.Y = bullet.Y + 10;
+                                    else if (bullet.Direction == "Up") bullet.Y = bullet.Y - 10;
+                                    else if (bullet.Direction == "Right") bullet.X = bullet.X + 10;
+                                    else if (bullet.Direction == "Left") bullet.X = bullet.X - 10;
+                                    if (bullet.X < 0 || bullet.X > 800 || bullet.Y < 0 || bullet.Y > 450) _deleteBullets.Add(i);
+                                    bool check = true;
+                                    int j = 0;
+                                    lock (roomModel.Bricks)
                                     {
-                                        if (bullet.Y >= brick.Y && bullet.X >= brick.X && bullet.Y <= brick.Y + 25 && bullet.X <= brick.X + 25 || bullet.Y + 5 >= brick.Y && bullet.X + 5 >= brick.X && bullet.Y + 5 <= brick.Y + 25 && bullet.X + 5 <= brick.X + 25)
+                                        foreach (var brick in roomModel.Bricks)
                                         {
-                                            check = false;
-                                            _deleteBricks.Add(j);
-                                        }
-                                        j++;
-                                    }
-                                }
-                                if (!check)
-                                {
-                                    if (!_deleteBullets.Contains(i)) _deleteBullets.Add(i);
-                                    _deleteBricks.Reverse();
-                                    lock (roomModel.Bricks) foreach (var item in _deleteBricks)
-                                        {
-                                            roomModel.Bricks.RemoveAt(item);
-                                        }
-
-                                    _deleteBricks.Clear();
-                                }
-                                if (check)
-                                {
-                                    lock (roomModel.Tanks) {
-                                        foreach (var it in roomModel.Tanks)
-                                        {
-                                            if (!it.Killed && bullet.Y > it.Y && bullet.X > it.X && bullet.Y < it.Y + 50 && bullet.X < it.X + 50)
+                                            if (bullet.Y >= brick.Y && bullet.X >= brick.X && bullet.Y <= brick.Y + 25 && bullet.X <= brick.X + 25 || bullet.Y + 5 >= brick.Y && bullet.X + 5 >= brick.X && bullet.Y + 5 <= brick.Y + 25 && bullet.X + 5 <= brick.X + 25)
                                             {
-                                                if (!_deleteBullets.Contains(i)) _deleteBullets.Add(i);
-                                                int damage = it.Defence - 1 - bullet.Power;
-                                                if (damage < 0)
+                                                check = false;
+                                                _deleteBricks.Add(j);
+                                            }
+                                            j++;
+                                        }
+                                    }
+                                    if (!check)
+                                    {
+                                        if (!_deleteBullets.Contains(i)) _deleteBullets.Add(i);
+                                        _deleteBricks.Reverse();
+                                        lock (roomModel.Bricks) foreach (var item in _deleteBricks)
+                                            {
+                                                roomModel.Bricks.RemoveAt(item);
+                                            }
+
+                                        _deleteBricks.Clear();
+                                    }
+                                    if (check)
+                                    {
+                                        lock (roomModel.Tanks)
+                                        {
+                                            foreach (var it in roomModel.Tanks)
+                                            {
+                                                if (!it.Killed && bullet.Y > it.Y && bullet.X > it.X && bullet.Y < it.Y + 50 && bullet.X < it.X + 50)
                                                 {
-                                                    it.Health += damage;
-                                                    if (it.Health <= 0)
+                                                    if (!_deleteBullets.Contains(i)) _deleteBullets.Add(i);
+                                                    int damage = it.Defence - 1 - bullet.Power;
+                                                    if (damage < 0)
                                                     {
-                                                        it.Killed = true;
-                                                        it.Deaths++;
-                                                        Connect.UpdateDeaths(it.Name, it.Deaths);
-                                                        Respawn(it.Name, roomModel);
-                                                        foreach (var tank in roomModel.Tanks)
+                                                        it.Health += damage;
+                                                        if (it.Health <= 0)
                                                         {
-                                                            if (tank.Name == bullet.Name)
+                                                            it.Killed = true;
+                                                            it.Deaths++;
+                                                            Connect.UpdateDeaths(it.Name, it.Deaths);
+                                                            Respawn(it.Name, roomModel);
+                                                            foreach (var tank in roomModel.Tanks)
                                                             {
-                                                                tank.Murders++;
-                                                                tank.Coins += 10;
-                                                                Connect.UpdateMurders(tank.Name, tank.Murders, tank.Coins);
-                                                                break;
+                                                                if (tank.Name == bullet.Name)
+                                                                {
+                                                                    tank.Murders++;
+                                                                    tank.Coins += 10;
+                                                                    Connect.UpdateMurders(tank.Name, tank.Murders, tank.Coins);
+                                                                    break;
+                                                                }
                                                             }
                                                         }
                                                     }
                                                 }
                                             }
                                         }
-                                    } 
+                                    }
+                                    i++;
                                 }
-                                i++;
+                                _deleteBullets.Reverse();
+                                foreach (var item in _deleteBullets)
+                                {
+                                    roomModel.Bullets.RemoveAt(item);
+                                }
+                                _deleteBullets.Clear();
+                                roomModel.IsReload = true;
                             }
-                            _deleteBullets.Reverse();
-                            foreach (var item in _deleteBullets)
-                            {
-                                roomModel.Bullets.RemoveAt(item);
-                            }
-                            _deleteBullets.Clear();
-                            roomModel.IsReload = true;
                         }
                     }
+                    catch { }
                 }
             });
         }
@@ -434,21 +448,21 @@ namespace Project_66_Server.Controller
             await Task.Run(() =>
             {
                 Client client = new Client();
+                client.Tanks = roomModel.Tanks;
+                client.Bullets = roomModel.Bullets;
+                client.Bricks = roomModel.Bricks;
                 while (true)
                 {
                     try
                     {
-                        Task.Delay(10);
+                        Task.Delay(100);
                         if (roomModel.IsReload)
                         {
-                            lock (roomModel.Sockets) foreach (var item in roomModel.Sockets)
+                            lock (roomModel.Sockets) lock (roomModel.Tanks) lock (roomModel.Bullets) lock (roomModel.Bricks) foreach (var item in roomModel.Sockets)
                             {
                                 try
                                 {
                                     Task.Delay(10);
-                                    client.Tanks = roomModel.Tanks;
-                                    client.Bullets = roomModel.Bullets;
-                                    client.Bricks = roomModel.Bricks;
                                     item.Send(Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(client)));
                                     roomModel.IsReload = false;
                                 }

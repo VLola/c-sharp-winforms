@@ -130,83 +130,92 @@ namespace Project_66_Client.Controller
         }
         public void RoomView_PreviewKeyDown(object? sender, PreviewKeyDownEventArgs e)
         {
-            if (e.KeyCode == Keys.Up)
+            try
             {
-                if (_clientController.GetLocationY() > 0) 
+
+                if (e.KeyCode == Keys.Up)
+                {
+                    if (_clientController.GetLocationY() > 0)
+                    {
+                        if (IsRun())
+                        {
+                            _clientController.Up();
+                            _clientController.SetIsDirection(true);
+                            SendClient();
+                            _clientController.SetIsDirection(false);
+                        }
+                    }
+                }
+                else if (e.KeyCode == Keys.Down)
+                {
+
+                    if (IsRun())
+                    {
+                        if (_clientController.GetLocationY() < 400)
+                        {
+                            _clientController.Down();
+                            _clientController.SetIsDirection(true);
+                            SendClient();
+                            _clientController.SetIsDirection(false);
+                        }
+                    }
+                }
+                else if (e.KeyCode == Keys.Left)
                 {
                     if (IsRun())
                     {
-                        _clientController.Up();
-                        _clientController.SetIsDirection(true);
-                        SendClient();
-                        _clientController.SetIsDirection(false);
+                        if (_clientController.GetLocationX() > 0)
+                        {
+                            _clientController.Left();
+                            _clientController.SetIsDirection(true);
+                            SendClient();
+                            _clientController.SetIsDirection(false);
+                        }
                     }
                 }
-            }
-            else if (e.KeyCode == Keys.Down)
-            {
-
-                if (IsRun())
+                else if (e.KeyCode == Keys.Right)
                 {
-                    if (_clientController.GetLocationY() < 400)
+                    if (IsRun())
                     {
-                        _clientController.Down();
-                        _clientController.SetIsDirection(true);
-                        SendClient();
-                        _clientController.SetIsDirection(false);
+                        if (_clientController.GetLocationX() < 750)
+                        {
+                            _clientController.Right();
+                            _clientController.SetIsDirection(true);
+                            SendClient();
+                            _clientController.SetIsDirection(false);
+                        }
                     }
                 }
-            }
-            else if (e.KeyCode == Keys.Left)
-            {
-                if (IsRun())
+                else if (e.KeyCode == Keys.Space)
                 {
-                    if (_clientController.GetLocationX() > 0)
-                    {
-                        _clientController.Left();
-                        _clientController.SetIsDirection(true);
-                        SendClient();
-                        _clientController.SetIsDirection(false);
-                    }
+                    _clientController.SetIsShot(true);
+                    SendClient();
+                    _clientController.SetIsShot(false);
                 }
-            }
-            else if (e.KeyCode == Keys.Right)
-            {
-                if (IsRun())
+                else if (e.KeyCode == Keys.Escape)
                 {
-                    if (_clientController.GetLocationX() < 750)
-                    {
-                        _clientController.Right();
-                        _clientController.SetIsDirection(true);
-                        SendClient();
-                        _clientController.SetIsDirection(false);
-                    }
+                    Disconnect();
                 }
             }
-            else if (e.KeyCode == Keys.Space)
-            {
-                _clientController.SetIsShot(true);
-                SendClient();
-                _clientController.SetIsShot(false);
-            }
-            else if (e.KeyCode == Keys.Escape)
-            {
-                Disconnect();
-            }
+            catch { }
         }
         private bool IsRun()
         {
-            lock (_roomController.BrickControllers) foreach (var item in _roomController.BrickControllers)
-                {
-                    if (new Rectangle(new Point(_clientController.GetLocationX(), _clientController.GetLocationY()), new Size(50, 50)).IntersectsWith(new Rectangle(item.GetBrickView().GetLocation(), new Size(25, 25))))
+            try
+            {
+                lock (_roomController.BrickControllers) foreach (var item in _roomController.BrickControllers)
                     {
-                        if (_clientController.GetDirection() == "Down") _clientController.SetLocationY(_clientController.GetLocationY() - 1);
-                        else if (_clientController.GetDirection() == "Up") _clientController.SetLocationY(_clientController.GetLocationY() + 1);
-                        else if (_clientController.GetDirection() == "Right") _clientController.SetLocationX(_clientController.GetLocationX() - 1);
-                        else if (_clientController.GetDirection() == "Left") _clientController.SetLocationX(_clientController.GetLocationX() + 1);
-                        return false;
+                        if (new Rectangle(new Point(_clientController.GetLocationX(), _clientController.GetLocationY()), new Size(50, 50)).IntersectsWith(new Rectangle(item.GetBrickView().GetLocation(), new Size(25, 25))))
+                        {
+                            if (_clientController.GetDirection() == "Down") _clientController.SetLocationY(_clientController.GetLocationY() - 1);
+                            else if (_clientController.GetDirection() == "Up") _clientController.SetLocationY(_clientController.GetLocationY() + 1);
+                            else if (_clientController.GetDirection() == "Right") _clientController.SetLocationX(_clientController.GetLocationX() - 1);
+                            else if (_clientController.GetDirection() == "Left") _clientController.SetLocationX(_clientController.GetLocationX() + 1);
+                            return false;
+                        }
                     }
-                }
+            }
+            catch { }
             return true;
         }
         private void SendClient()
@@ -249,66 +258,70 @@ namespace Project_66_Client.Controller
                             }
                             else
                             {
-                                ClientModel? client = JsonSerializer.Deserialize<ClientModel>(builder.ToString());
-                                if (client != null)
+                                try
                                 {
-                                    if (client.IsLogin)
+                                    ClientModel? client = JsonSerializer.Deserialize<ClientModel>(builder.ToString());
+                                    if (client != null)
                                     {
-                                        if (client.Login)
+                                        if (client.IsLogin)
                                         {
-                                            _gameView.ClientVisible();
-                                            _gameView.SetClientName(_clientController.GetName());
-                                            _infoController.SetInfo(client.Tank);
-                                        }
-                                        else MessageBox.Show("Login error!");
-                                    }
-                                    else if (client.IsRegister)
-                                    {
-                                        if (client.Login)
-                                        {
-                                            _gameView.ClientVisible();
-                                            _gameView.SetClientName(_clientController.GetName());
-                                            _infoController.SetInfo(client.Tank);
-                                        }
-                                        else MessageBox.Show("Register error!");
-                                    }
-                                    else if (client.IsStart)
-                                    {
-                                        _gameView.GameVisible();
-                                    }
-                                    else if (client.BuyDefence || client.BuyPower)
-                                    {
-                                        _infoController.SetInfo(client.Tank);
-                                    }
-                                    Task.Run(() =>
-                                    {
-                                        _players.Clear();
-                                        if(client.Tanks != null) foreach (var item in client.Tanks)
-                                        {
-                                            _players.Add(item.Name);
-                                            if (item.Name == _clientController.GetName())
+                                            if (client.Login)
                                             {
-                                                _clientController.SetTank(item);
-                                                _infoController.SetInfo(item);
+                                                _gameView.ClientVisible();
+                                                _gameView.SetClientName(_clientController.GetName());
+                                                _infoController.SetInfo(client.Tank);
                                             }
+                                            else MessageBox.Show("Login error!");
                                         }
-                                        if (!_playersCheck.SequenceEqual(_players))
+                                        else if (client.IsRegister)
                                         {
-                                            _playersCheck.Clear();
-                                            _playersCheck.AddRange(_players);
-                                            _gameView.PlayersClear();
-                                            _gameView.PlayersAdd(_players.ToArray());
+                                            if (client.Login)
+                                            {
+                                                _gameView.ClientVisible();
+                                                _gameView.SetClientName(_clientController.GetName());
+                                                _infoController.SetInfo(client.Tank);
+                                            }
+                                            else MessageBox.Show("Register error!");
                                         }
-                                        _roomController.LoadBricks(client.Bricks);
-                                        _roomController.LoadTanks(client.Tanks);
-                                        _roomController.LoadBullets(client.Bullets);
-                                    });
+                                        else if (client.IsStart)
+                                        {
+                                            _gameView.GameVisible();
+                                        }
+                                        else if (client.BuyDefence || client.BuyPower)
+                                        {
+                                            _infoController.SetInfo(client.Tank);
+                                        }
+                                        Task.Run(() =>
+                                        {
+                                            _players.Clear();
+                                            if (client.Tanks != null) foreach (var item in client.Tanks)
+                                                {
+                                                    _players.Add(item.Name);
+                                                    if (item.Name == _clientController.GetName())
+                                                    {
+                                                        _clientController.SetTank(item);
+                                                        _infoController.SetInfo(item);
+                                                    }
+                                                }
+                                            if (!_playersCheck.SequenceEqual(_players))
+                                            {
+                                                _playersCheck.Clear();
+                                                _playersCheck.AddRange(_players);
+                                                _gameView.PlayersClear();
+                                                _gameView.PlayersAdd(_players.ToArray());
+                                            }
+                                            _roomController.LoadBricks(client.Bricks);
+                                            _roomController.LoadTanks(client.Tanks);
+                                            _roomController.LoadBullets(client.Bullets);
+                                        });
+                                    }
                                 }
+                                catch { }
                             }
                         }
                         catch
                         {
-                            
+                            break;
                         }
                     }
                 }
