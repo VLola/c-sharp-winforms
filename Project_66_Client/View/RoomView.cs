@@ -66,5 +66,35 @@
                 Controls.Remove(brickView);
             }
         }
+        public BulletView AddBullet()
+        {
+            BulletView bulletView = new();
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    Controls.Add(bulletView);
+                }));
+            }
+            else
+            {
+                Controls.Add(bulletView);
+            }
+            return bulletView;
+        }
+        public void RemoveBullet(BulletView bulletView)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    Controls.Remove(bulletView);
+                }));
+            }
+            else
+            {
+                Controls.Remove(bulletView);
+            }
+        }
     }
 }

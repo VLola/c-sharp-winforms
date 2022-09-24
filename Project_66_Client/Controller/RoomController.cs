@@ -7,80 +7,97 @@ namespace Project_66_Client.Controller
     {
         RoomView _roomView;
         List<int> _deleteBullets = new();
-        List<int> _bricksRemove = new();
-        List<TankController> tankControllers = new();
+        List<int> _deleteBricks = new();
+        List<TankController> _tankControllers = new();
         public List<BrickController> BrickControllers = new();
+        List<BulletController> _bulletControllers = new();
         public RoomController(RoomView roomView)
         {
             _roomView = roomView;
         }
         public void LoadTanks(List<TankModel> tankModels)
         {
-            if(tankModels != null)
+            try
             {
-                // Add
-                lock (tankModels) foreach (var item in tankModels)
-                    {
-                        if (!CheckName(item.Name))
+                if (tankModels != null)
+                {
+                    // Add
+                    lock (tankModels) foreach (var item in tankModels)
                         {
-                            lock (tankControllers) tankControllers.Add(new TankController(_roomView, new TankView(), item));
+                            if (!CheckName(item.Name))
+                            {
+                                lock (_tankControllers) _tankControllers.Add(new TankController(_roomView, new TankView(), item));
+                            }
+                            else
+                            {
+                                LoadTank(item);
+                            }
                         }
-                        else
+                    // Delete
+                    int i = 0;
+                    bool check = false;
+                    lock (_tankControllers) foreach (var item in _tankControllers)
                         {
-                            LoadTank(item);
+                            if (!CheckDeleteName(item.Name, tankModels))
+                            {
+                                check = true;
+                                break;
+                            }
+                            i++;
                         }
-                    }
-                // Delete
-                int i = 0;
-                bool check = false;
-                lock (tankControllers) foreach (var item in tankControllers)
-                    {
-                        if (!CheckDeleteName(item.Name, tankModels))
+                    if (check)
+                        lock (_tankControllers)
                         {
-                            check = true;
-                            break;
+                            _tankControllers[i].DisposeTank();
+                            _tankControllers.RemoveAt(i);
                         }
-                        i++;
-                    }
-                if (check)
-                    lock (tankControllers)
-                    {
-                        tankControllers[i].DisposeTank();
-                        tankControllers.RemoveAt(i);
-                    }
+                }
             }
+            catch { }
         }
         private void LoadTank(TankModel tankModel)
         {
-            lock (tankControllers)
+            try
             {
-                foreach (var item in tankControllers)
+                lock (_tankControllers)
                 {
-                    if (item.Name == tankModel.Name) item.Load(tankModel);
+                    foreach (var item in _tankControllers)
+                    {
+                        if (item.Name == tankModel.Name) item.Load(tankModel);
+                    }
                 }
             }
+            catch { }
         }
         private bool CheckDeleteName(string name, List<TankModel> tankModels)
         {
-            lock (tankModels)
+            try
             {
-                foreach (var item in tankModels)
+                lock (tankModels)
                 {
-                    if (item.Name == name) return true;
+                    foreach (var item in tankModels)
+                    {
+                        if (item.Name == name) return true;
+                    }
                 }
-                return false;
             }
+            catch { }
+            return false;
         }
         private bool CheckName(string name)
         {
-            lock (tankControllers)
+            try
             {
-                foreach (var item in tankControllers)
+                lock (_tankControllers)
                 {
-                    if (item.Name == name) return true;
+                    foreach (var item in _tankControllers)
+                    {
+                        if (item.Name == name) return true;
+                    }
                 }
-                return false;
             }
+            catch { }
+            return false;
         }
         public void LoadBullets(List<BulletModel> value)
         {
@@ -107,99 +124,119 @@ namespace Project_66_Client.Controller
         }
         private void DeleteBullet(List<BulletModel> value)
         {
-            int i = 0;
-            foreach (Control bulletView in _roomView.Controls)
+            try
             {
-                bool check = false;
-                if (bulletView is BulletView)
+                int i = 0;
+                foreach (var controller in _bulletControllers)
                 {
+                    bool check = false;
                     foreach (var it in value)
                     {
-                        if (it.Id.ToString() == bulletView.Name) {
+                        if (it.Id == controller.Id)
+                        {
                             check = true;
                             break;
                         }
                     }
-                    if (!check) _deleteBullets.Add(i);
+                    if (!check) {
+                        controller.RemoveBullet();
+                        _deleteBullets.Add(i);
+                    }
+                    i++;
                 }
-                i++;
+                _deleteBullets.Reverse();
+                foreach (var item in _deleteBullets)
+                {
+                    _bulletControllers.RemoveAt(item);
+                }
             }
-            _deleteBullets.Reverse();
-            foreach (var item in _deleteBullets)
-            {
-                _roomView.Controls.RemoveAt(item);
-            }
+            catch { }
             _deleteBullets.Clear();
         }
         private void AddBullet(List<BulletModel> value)
         {
-            if(value != null)
-            foreach (var it in value)
+            try
             {
-                bool check = false;
-                foreach (Control bulletView in _roomView.Controls)
-                {
-                    if (it.Id.ToString() == bulletView.Name)
+                if (value != null)
+                    foreach (var it in value)
                     {
-                        bulletView.Location = new(it.X, it.Y);
-                        check = true;
-                        break;
+                        bool check = false;
+                        foreach (var controller in _bulletControllers)
+                        {
+                            if (it.Id == controller.Id)
+                            {
+                                controller.LoadBullet(it);
+                                check = true;
+                                break;
+                            }
+                        }
+                        if (!check)
+                        {
+                            _bulletControllers.Add(new BulletController(_roomView, it));
+                        }
                     }
-                }
-                if (!check)
-                {
-                    BulletView bulletView = new BulletView();
-                    bulletView.Name = it.Id.ToString();
-                    bulletView.Location = new(it.X, it.Y);
-                    _roomView.Controls.Add(bulletView);
-                }
             }
+            catch { }
         }
         public void LoadBricks(List<BrickModel> bricks)
         {
-            lock (BrickControllers) {
-                if (bricks != null) {
-                    foreach (var model in bricks)
+            try
+            {
+                lock (BrickControllers)
+                {
+                    if (bricks != null)
                     {
-                        if (!CheckBrickToControllers(model))
+                        foreach (var model in bricks)
                         {
-                            BrickControllers.Add(new BrickController(_roomView.AddBrick(), model));
+                            if (!CheckBrickToControllers(model))
+                            {
+                                BrickControllers.Add(new BrickController(_roomView.AddBrick(), model));
+                            }
                         }
-                    }
 
-                    int i = 0;
-                    foreach (var controller in BrickControllers)
-                    {
-                        if (!CheckBrickToModels(bricks, controller.GetBrickModel()))
+                        int i = 0;
+                        foreach (var controller in BrickControllers)
                         {
-                            _roomView.RemoveBrick(controller.GetBrickView());
-                            _bricksRemove.Add(i);
+                            if (!CheckBrickToModels(bricks, controller.GetBrickModel()))
+                            {
+                                _roomView.RemoveBrick(controller.GetBrickView());
+                                _deleteBricks.Add(i);
+                            }
+                            i++;
                         }
-                        i++;
+                        _deleteBricks.Reverse();
+                        foreach (var item in _deleteBricks)
+                        {
+                            BrickControllers.RemoveAt(item);
+                        }
                     }
-                    _bricksRemove.Reverse();
-                    foreach (var item in _bricksRemove)
-                    {
-                        BrickControllers.RemoveAt(item);
-                    }
-                    _bricksRemove.Clear();
                 }
-            } 
+            }
+            catch { }
+            _deleteBricks.Clear();
         }
         public bool CheckBrickToControllers(BrickModel brickModel)
         {
-            foreach (var controller in BrickControllers)
+            try
             {
-                if (controller.GetBrickModel().Id == brickModel.Id) return true;
+                foreach (var controller in BrickControllers)
+                {
+                    if (controller.GetBrickModel().Id == brickModel.Id) return true;
+                }
             }
+            catch { }
             return false;
         }
         public bool CheckBrickToModels(List<BrickModel> bricks, BrickModel brickModel)
         {
-            foreach (var model in bricks)
+            try
             {
-                if (model.Id == brickModel.Id) return true;
+                foreach (var model in bricks)
+                {
+                    if (model.Id == brickModel.Id) return true;
+                }
             }
+            catch { }
             return false;
         }
     }

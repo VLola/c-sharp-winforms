@@ -242,7 +242,7 @@ namespace Project_66_Client.Controller
                         try
                         {
                             int bytes = 0;
-                            byte[] buffer = new byte[64000];
+                            byte[] buffer = new byte[100000];
                             StringBuilder builder = new StringBuilder();
                             do
                             {

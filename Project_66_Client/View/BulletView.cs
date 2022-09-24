@@ -2,9 +2,8 @@
 
 namespace Project_66_Client.View
 {
-    internal class BulletView : Control
+    public class BulletView : Control
     {
-        public int Id;
         public BulletView()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor | ControlStyles.UserPaint, true);
@@ -31,13 +30,11 @@ namespace Project_66_Client.View
                 {
                     Invoke(new Action(() =>
                     {
-                        Id = value.Id;
                         Location = new(value.X, value.Y);
                     }));
                 }
                 else
                 {
-                    Id = value.Id;
                     Location = new(value.X, value.Y);
                 }
             }

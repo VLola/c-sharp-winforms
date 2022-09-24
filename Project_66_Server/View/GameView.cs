@@ -10,6 +10,7 @@ namespace Project_66_Server.View
         ListBox Games { get; set; }
         ListBox Users { get; set; }
         ListBox User { get; set; }
+        Label CountPackts { get; set; }
         public GameView()
         {
             InitializeComponent();
@@ -21,14 +22,19 @@ namespace Project_66_Server.View
             AutoSize = true;
             Games = new ListBox();
             Users = new ListBox();
+            CountPackts = new Label();
             Users.Location = new Point(200, 0);
 
             User = new ListBox();
             User.Location = new Point(400, 0);
 
+            CountPackts.Text = "0";
+            CountPackts.Location = new Point(0, 95);
+
             Controls.Add(Games);
             Controls.Add(Users);
             Controls.Add(User);
+            Controls.Add(CountPackts);
             Games.SelectedIndexChanged += Games_SelectedIndexChanged;
             Users.SelectedIndexChanged += Users_SelectedIndexChanged;
         }
@@ -58,6 +64,20 @@ namespace Project_66_Server.View
             Invoke(new Action(() => {
                 Games.Items.Add(roomModel);
             }));
+        }
+        public void SendPacket(int count)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    CountPackts.Text = count.ToString();
+                }));
+            }
+            else
+            {
+                CountPackts.Text = count.ToString();
+            }
         }
 
     }
